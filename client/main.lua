@@ -21,7 +21,7 @@ Citizen.CreateThread(function()
             u5_ui.addSection(
             {
                 {
-                    type = "Button",
+                    type = "ShadcnButton",
                     props = {
                         text = "Shad",
                     }
