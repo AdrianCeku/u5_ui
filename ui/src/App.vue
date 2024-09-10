@@ -1,11 +1,9 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+
 </script>
 
 <template>
-   <RouterView /> <!-- DONT REMOVE, OR YOU WONT BE ABLE TO SEE PAGES -->
+  <main>
+    <div class="bg-background text-text"> Hello</div>
+  </main>
 </template>
-
-<style scoped>
-
-</style>
