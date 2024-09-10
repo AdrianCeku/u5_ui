@@ -11,11 +11,12 @@ version '1.0'
 lua54 'yes'
 
 ui_page {
-	'html/index.html',
+	'ui/dist/index.html',
 }
 
 files {
-
+	'ui/dist/*',
+	'ui/dist/**/*'
 }
 
 shared_scripts{
@@ -23,9 +24,9 @@ shared_scripts{
 }
 
 client_scripts{
-
+	"client/*"
 }
 
 server_scripts{
-
+	"server/*"
 }
