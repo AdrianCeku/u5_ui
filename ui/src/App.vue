@@ -1,12 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 
-import ShadcnButton from '@/components/shadcn/ShadcnButton.vue'
-import TestButton from '@/components/custom/TestButton.vue'
 
 const componentMap = {
-  "ShadcnButton": ShadcnButton,
-  "TestButton": TestButton
+
 }
 
 const sections = ref([])
