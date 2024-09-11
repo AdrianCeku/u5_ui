@@ -25,13 +25,20 @@ Citizen.CreateThread(function()
                         text = "Shad",
                     }
                 },
+                {
+                    type = "Accordion",
+                    props = {
+                        headline = "Accordion",
+                        content = "This is an accordion"
+                    }
+                },
             }
 
             local options = {
                 title = "Hello World",
                 description = "This is a test"
             }
-            
+
             u5_ui.addSection(components, options)
             SetNuiFocus(true, true)
             Wait(5000)

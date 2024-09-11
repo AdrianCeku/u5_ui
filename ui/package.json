@@ -11,13 +11,23 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
+    "@unovis/ts": "^1.4.3-beta.0",
+    "@unovis/vue": "^1.4.3-beta.0",
+    "@vee-validate/zod": "^4.13.2",
+    "@vueuse/core": "^11.0.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "embla-carousel-vue": "^8.2.1",
     "lucide-vue-next": "^0.439.0",
     "radix-vue": "^1.9.5",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
-    "vue": "^3.4.29"
+    "v-calendar": "^3.1.2",
+    "vaul-vue": "^0.2.0",
+    "vee-validate": "^4.13.2",
+    "vue": "^3.4.29",
+    "vue-sonner": "^1.1.5",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",

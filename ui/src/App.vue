@@ -2,12 +2,14 @@
 import { ref } from 'vue';
 
 import { Button } from '@/components/ui/button'
+import Accordion from '@/components/framework/Accordion.vue'
 
 interface ComponentMap {
   [key: string]: any;
 }
 const componentMap: ComponentMap = {
- "Button": Button
+ "Button": Button,
+  "Accordion": Accordion
 }
 
 interface Section {
