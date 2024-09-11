@@ -18,25 +18,21 @@ Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
         if IsControlJustPressed(0, 38) then
-            u5_ui.addSection(
-            {
+            local components = {
                 {
-                    type = "ShadcnButton",
+                    type = "Button",
                     props = {
                         text = "Shad",
                     }
                 },
-                {
-                    type = "TestButton",
-                    props = {
-                        text = "Test",
-                    },
-                }
-            }, 
-            {
+            }
+
+            local options = {
                 title = "Hello World",
                 description = "This is a test"
-            })
+            }
+            
+            u5_ui.addSection(components, options)
             SetNuiFocus(true, true)
             Wait(5000)
             SetNuiFocus(false, false)

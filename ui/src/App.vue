@@ -1,12 +1,28 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+import { Button } from '@/components/ui/button'
 
-const componentMap = {
-
+interface ComponentMap {
+  [key: string]: any;
+}
+const componentMap: ComponentMap = {
+ "Button": Button
 }
 
-const sections = ref([])
+interface Section {
+  options: {
+    title: string
+  }
+  components: {
+    type: string
+    props: {
+      [key: string]: any
+    }
+  }[]
+}
+
+const sections = ref<Section[]>([])
 
 window.addEventListener('message', (event) => {
   console.log(event.data)
