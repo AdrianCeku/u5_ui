@@ -29,8 +29,10 @@ interface Section {
     display?: "flex" | "grid" | "block"
     xOverflow?: "visible" | "hidden" | "scroll" | "auto"
     yOverflow?: "visible" | "hidden" | "scroll" | "auto"
-    style?: string[]
   }
+  onCloseId?: number
+  style?: string
+  innerHTML?: string
   components: {    
     componentType: string
     props?: {
@@ -40,7 +42,6 @@ interface Section {
     onClickId?: number
     style?: string[]
   }[]
-  onCloseId?: number
 }
 
 const sections = ref<Section[]>([])
@@ -169,8 +170,10 @@ window.addEventListener('message', (event) => {
   if (event.data.type === 'addSection') {
     const section = {
       options: event.data.options,
-      components: [],
-      onCloseId: event.data.onCloseId
+      onCloseId: event.data.onCloseId,
+      style: event.data.style,
+      innerHTML: event.data.innerHTML,
+      components: []
     }
 
     sections.value.push(section)
@@ -228,10 +231,10 @@ window.addEventListener("keyup", (event) => {
       :key="sectionId" 
       :id="sectionId.toString()"
       :class="getClasses(section.options)"
-      :style='section.options.style'
-      class="absolute m-10 px-5 pb-5 pt-2 top-0 left-0 bottom-0 right-0 bg-background rounded-md rounded-t-2xl rounded-r-2xl"
+      :style='section.style'
+      class="absolute m-10 px-5 pb-5 pt-2 top-0 left-0 bottom-0 right-0 bg-background rounded-md rounded-t-2xl shadow-lg"
     >
-    <header class="h-14 grid">
+    <header class="grid">
       <svg
         v-if="!section.options.showCloseButton === false"
         class="h-6 ml-auto cursor-pointer hover:scale-105 transition-transform translate-x-3"  
@@ -261,6 +264,7 @@ window.addEventListener("keyup", (event) => {
         </h1>
       </div>
     </header>
+      <div :v-if="section.innerHTML" v-html="section.innerHTML"></div>
       <component
         v-for="(component, componentId) in section.components"
         :key="componentId"
@@ -270,7 +274,7 @@ window.addEventListener("keyup", (event) => {
         :style='component.style'
         @click="component.onClickId ? clickTriggered(component.onClickId) : null"
       >
-        <div :v-if="component.innerHTML" :inner-h-t-m-l="component.innerHTML"></div>
+        <div :v-if="component.innerHTML" v-html="component.innerHTML"></div>
       </component>
     </section>
   </main>
@@ -303,7 +307,7 @@ window.addEventListener("keyup", (event) => {
     }
     100% {
       transform: translateY(-100vh);
-      display: none;
+      visibility: hidden;
     }
   }
 
@@ -316,7 +320,7 @@ window.addEventListener("keyup", (event) => {
     }
     100% {
       transform: translateY(100vh);
-      display: none;
+      visibility: hidden;
     }
   }
 
@@ -329,7 +333,7 @@ window.addEventListener("keyup", (event) => {
     }
     100% {
       transform: translateX(-100vw);
-      display: none;
+      visibility: hidden;
     }
   }
 
@@ -342,7 +346,7 @@ window.addEventListener("keyup", (event) => {
     }
     100% {
       transform: translateX(100vw);
-      display: none;
+      visibility: hidden;
     }
   }
 </style>

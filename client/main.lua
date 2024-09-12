@@ -8,7 +8,7 @@ local COMPONENT_ID = nil
 
 local onClickFunctions = {}
 
-function u5_ui.addSection(options, onClose)
+function u5_ui.addSection(options, onClose, style, innerHTML)
     local onCloseId = nil
 
     if onClose then
@@ -21,7 +21,9 @@ function u5_ui.addSection(options, onClose)
     SendNUIMessage({
         type = "addSection",
         options = options,
-        onCloseId = onCloseId
+        onCloseId = onCloseId,
+        style = style,
+        innerHTML = innerHTML
     })
                 
     while WAITING_FOR_SECTION_ID do
@@ -34,7 +36,7 @@ function u5_ui.addSection(options, onClose)
     return retVal
 end
 
-function u5_ui.addComponent(sectionId, componentType, props, onClick)
+function u5_ui.addComponent(sectionId, componentType, props, onClick, style, innerHTML)
     local onClickId = nil
 
     if onClick then
@@ -45,14 +47,16 @@ function u5_ui.addComponent(sectionId, componentType, props, onClick)
     local component = {
         componentType = componentType,
         props = props,
-        onClickId = onClickId
+        onClickId = onClickId,
+        innerHTML = innerHTML,
+        style = style
     }
 
     WAITING_FOR_COMPONENT_ID = true
     SendNuiMessage(json.encode({
         type = "addComponent",
         sectionId = sectionId,
-        component = component
+        component = component,
     }))
 
     while WAITING_FOR_COMPONENT_ID do

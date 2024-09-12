@@ -13,6 +13,7 @@ const props = defineProps({
             <AccordionTrigger>{{ props.headline }}</AccordionTrigger>
             <AccordionContent>
                 {{ props.content }}
+                <slot />
             </AccordionContent>
         </AccordionItem>
     </Accordion>
