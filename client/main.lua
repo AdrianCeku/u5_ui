@@ -8,15 +8,13 @@ local COMPONENT_ID = nil
 
 local onClickFunctions = {}
 
-function u5_ui.addSection(components, options)
+function u5_ui.addSection(options)
     WAITING_FOR_SECTION_ID = true
+
     SendNUIMessage({
-                    type = "addSection",
-                    section = {
-                        components = components,
-                        options = options
-                    }
-                })
+        type = "addSection",
+        options = options
+    })
                 
     while WAITING_FOR_SECTION_ID do
         Citizen.Wait(10)
@@ -28,22 +26,26 @@ function u5_ui.addSection(components, options)
     return retVal
 end
 
-function u5_ui.addComponentToSection(sectionId, componentType, props, onClick)
-    local onClickId = #onClickFunctions + 1
-    onClickFunctions[onClickId] = onClick
+function u5_ui.addComponent(sectionId, componentType, props, onClick)
+    local onClickId = nil
+
+    if onClick then
+        onClickId = #onClickFunctions + 1
+        onClickFunctions[onClickId] = onClick
+    end
 
     local component = {
-        type = componentType,
+        componentType = componentType,
         props = props,
         onClickId = onClickId
     }
 
     WAITING_FOR_COMPONENT_ID = true
-    SendNuiMessage({
-        type = "addComponentToSection",
+    SendNuiMessage(json.encode({
+        type = "addComponent",
         sectionId = sectionId,
         component = component
-    })
+    }))
 
     while WAITING_FOR_COMPONENT_ID do
         Citizen.Wait(10)
@@ -79,35 +81,13 @@ exports("getObject", function()
     return u5_ui
 end)
 
+local state = true
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
         if IsControlJustPressed(0, 38) then
-            local components = {
-                {
-                    type = "Button",
-                    props = {
-                        text = "Shad",
-                    }
-                },
-                {
-                    type = "Accordion",
-                    props = {
-                        headline = "Accordion",
-                        content = "This is an accordion"
-                    }
-                },
-            }
-
-            local options = {
-                title = "Hello World",
-                description = "This is a test"
-            }
-
-            local section = u5_ui.addSection(components, options)
-            SetNuiFocus(true, true)
-            Wait(5000)
-            SetNuiFocus(false, false)
+            SetNuiFocus(state, state)
+            state = not state
         end
     end
 end)
