@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-import { Button } from '@/components/ui/button'
 import Accordion from '@/components/framework/Accordion.vue'
+import Alert from '@/components/framework/Alert.vue'
+import AlertDialog from '@/components/framework/AlertDialog.vue'
+import Input from '@/components/framework/Input.vue'
 
 interface ComponentMap {
   [key: string]: any;
 }
 const componentMap: ComponentMap = {
-  "Button": Button,
-  "Accordion": Accordion
+  "Accordion": Accordion,
+  "Alert": Alert,
+  "AlertDialog": AlertDialog,
+  "Input": Input,
 }
 
 function getComponent(componentType: string) {
@@ -40,6 +44,7 @@ interface Section {
     }
     innerHTML?: string
     onClickId?: number
+    onInputId?: number
     style?: string[]
   }[]
 }
@@ -106,14 +111,29 @@ function getClasses(sectionOptions: Section['options']) {
   return classes
 }
 
-function clickTriggered(id: number) {
+function clickTriggered(id: number, passThrough: any =null) {
   fetch(`https://u5_ui/clickTriggered`, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json; charset=UTF-8',
     },
     body: JSON.stringify({
-        id: id
+        id: id,
+        passThrough: passThrough
+    })
+  });
+}
+
+function changeTriggered(id: number, value: any =null) {
+  console.log("changeTriggered")
+  fetch(`https://u5_ui/changeTriggered`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: JSON.stringify({
+        id: id,
+        value: value
     })
   });
 }
@@ -161,10 +181,9 @@ function closeSection(sectionId: number, onCloseId: number | undefined) {
 function openSection(sectionId: number) {
   const section = document.getElementById(sectionId.toString())
   if(section) {
-    section.style.display = sections.value[sectionId].options.display ?? "block"
+    section.classList.remove(getCloseAnimation(sectionId))
   }
 }
-
 
 window.addEventListener('message', (event) => {
   if (event.data.type === 'addSection') {
@@ -216,8 +235,8 @@ window.addEventListener('message', (event) => {
 
 })
 
-window.addEventListener("keyup", (event) => {
-  if (event.key.toLowerCase() === "e") {
+window.addEventListener("keydown", (event) => {
+  if (event.key.toLowerCase() === "alt") {
     exit()
   }
 })
@@ -225,6 +244,13 @@ window.addEventListener("keyup", (event) => {
 </script>
 
 <template>
+  <div class="p-10">
+    <Accordion headline="Test" content="Wow"/>
+    <Alert headline="Test" content="Wow"/>
+    <AlertDialog trigger="amk" headline="Test" content="Wow" />
+    <Input label="hello" type="email"/>
+  </div>
+
   <main class="h-svh w-svw">
     <section 
       v-for="(section, sectionId) in sections" 
@@ -268,12 +294,13 @@ window.addEventListener("keyup", (event) => {
       <component
         v-for="(component, componentId) in section.components"
         :key="componentId"
-        :component-id="componentId"
+        :id="sectionId.toString() + componentId.toString()"
         :is="getComponent(component.componentType)"
         v-bind="component.props"
         :style='component.style'
-        @click="component.onClickId ? clickTriggered(component.onClickId) : null"
-      >
+        @event-click="(passThrough: any) => component.onClickId ? clickTriggered(component.onClickId, passThrough) : null"
+        @event-input="(value: any) => component.onInputId ? changeTriggered(component.onInputId, value) : console.log('no change event')"
+        >
         <div :v-if="component.innerHTML" v-html="component.innerHTML"></div>
       </component>
     </section>

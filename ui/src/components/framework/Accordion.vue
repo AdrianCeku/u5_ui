@@ -10,7 +10,7 @@ const props = defineProps({
 <template>
     <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
-            <AccordionTrigger>{{ props.headline }}</AccordionTrigger>
+            <AccordionTrigger @click="$emit('event-click')">{{ props.headline }}</AccordionTrigger>
             <AccordionContent>
                 {{ props.content }}
                 <slot />

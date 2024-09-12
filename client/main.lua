@@ -7,8 +7,9 @@ local WAITING_FOR_COMPONENT_ID = false
 local COMPONENT_ID = nil
 
 local onClickFunctions = {}
+local onInputFunctions = {}
 
-function u5_ui.addSection(options, onClose, style, innerHTML)
+function u5_ui.addSection(options, style, innerHTML, onClose)
     local onCloseId = nil
 
     if onClose then
@@ -36,7 +37,7 @@ function u5_ui.addSection(options, onClose, style, innerHTML)
     return retVal
 end
 
-function u5_ui.addComponent(sectionId, componentType, props, onClick, style, innerHTML)
+function u5_ui.addComponent(sectionId, componentType, props, style, innerHTML, onClick, onInput)
     local onClickId = nil
 
     if onClick then
@@ -44,10 +45,18 @@ function u5_ui.addComponent(sectionId, componentType, props, onClick, style, inn
         onClickFunctions[onClickId] = onClick
     end
 
+    local onInputId = nil
+
+    if onInput then
+        onInputId = #onInputFunctions + 1
+        onInputFunctions[onInputId] = onInput
+    end
+
     local component = {
         componentType = componentType,
         props = props,
         onClickId = onClickId,
+        onInputId = onInputId,
         innerHTML = innerHTML,
         style = style
     }
@@ -84,7 +93,13 @@ RegisterNUICallback('sendComponentId', function(data, cb)
 end)
 
 RegisterNUICallback('clickTriggered', function(data, cb)
-    onClickFunctions[data.id]()
+    onClickFunctions[data.id](data.passThrough)
+    
+    cb('ok')
+end)
+
+RegisterNUICallback('changeTriggered', function(data, cb)
+    onInputFunctions[data.id](data.value)
     
     cb('ok')
 end)
@@ -102,7 +117,7 @@ end)
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
-        if IsControlJustPressed(0, 38) then
+        if IsControlJustPressed(0, 19) then
             SetNuiFocus(true, true)
         end
     end
