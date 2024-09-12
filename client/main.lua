@@ -8,12 +8,20 @@ local COMPONENT_ID = nil
 
 local onClickFunctions = {}
 
-function u5_ui.addSection(options)
+function u5_ui.addSection(options, onClose)
+    local onCloseId = nil
+
+    if onClose then
+        onCloseId = #onClickFunctions + 1
+        onClickFunctions[onCloseId] = onClose
+    end
+    
     WAITING_FOR_SECTION_ID = true
 
     SendNUIMessage({
         type = "addSection",
-        options = options
+        options = options,
+        onCloseId = onCloseId
     })
                 
     while WAITING_FOR_SECTION_ID do
@@ -77,17 +85,21 @@ RegisterNUICallback('clickTriggered', function(data, cb)
     cb('ok')
 end)
 
+RegisterNUICallback('exit', function(data, cb)
+    SetNuiFocus(false, false)
+    
+    cb('ok')
+end)
+
 exports("getObject", function()
     return u5_ui
 end)
 
-local state = true
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
         if IsControlJustPressed(0, 38) then
-            SetNuiFocus(state, state)
-            state = not state
+            SetNuiFocus(true, true)
         end
     end
 end)

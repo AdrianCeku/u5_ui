@@ -21,11 +21,12 @@ interface Section {
   options: {
     title?: string
     image?: string
+    showCloseButton?: boolean
     xAlign?: "left" | "center" | "right"
     yAlign?: "top" | "center" | "bottom"
-    width?: "full" | "twoThirds" | "half" | "third" | "quarter"
-    height?: "full" | "twoThirds" | "half" | "third" | "quarter"
-    display?: "flex" | "grid" | "block" | "hidden"
+    width?: "full" | "twoThirds" | "half" | "third" | "quarter" | "fit"
+    height?: "full" | "twoThirds" | "half" | "third" | "quarter" | "fit"
+    display?: "flex" | "grid" | "block"
     xOverflow?: "visible" | "hidden" | "scroll" | "auto"
     yOverflow?: "visible" | "hidden" | "scroll" | "auto"
     style?: string[]
@@ -35,9 +36,11 @@ interface Section {
     props?: {
       [key: string]: any
     }
+    innerHTML?: string
     onClickId?: number
     style?: string[]
-    }[]
+  }[]
+  onCloseId?: number
 }
 
 const sections = ref<Section[]>([])
@@ -58,20 +61,21 @@ const classesMap = {
     "twoThirds": "w-2/3",
     "half": "w-1/2",
     "third": "w-1/3",
-    "quarter": "w-1/4"
+    "quarter": "w-1/4",
+    "fit" : "w-fit"
   },
   "height": {
     "full": "h-full",
     "twoThirds": "h-2/3",
     "half": "h-1/2",
     "third": "h-1/3",
-    "quarter": "h-1/4"
+    "quarter": "h-1/4",
+    "fit" : "h-fit"
   },
   "display": {
     "flex": "flex",
     "grid": "grid",
-    "block": "block",
-    "hidden": "hidden"
+    "block": "block"
   },
   "xOverflow": {
     "visible": "overflow-x-visible",
@@ -92,8 +96,8 @@ function getClasses(sectionOptions: Section['options']) {
 
   classes.push(classesMap.xAlign[sectionOptions.xAlign ?? "center"])
   classes.push(classesMap.yAlign[sectionOptions.yAlign ?? "center"])
-  classes.push(classesMap.width[sectionOptions.width ?? "full"])
-  classes.push(classesMap.height[sectionOptions.height ?? "full"])
+  classes.push(classesMap.width[sectionOptions.width ?? "fit"])
+  classes.push(classesMap.height[sectionOptions.height ?? "fit"])
   classes.push(classesMap.display[sectionOptions.display ?? "block"])
   classes.push(classesMap.xOverflow[sectionOptions.xOverflow ?? "auto"])
   classes.push(classesMap.yOverflow[sectionOptions.yOverflow ?? "auto"])
@@ -101,10 +105,55 @@ function getClasses(sectionOptions: Section['options']) {
   return classes
 }
 
-function closeSection(sectionId: number) {
+function clickTriggered(id: number) {
+  fetch(`https://u5_ui/clickTriggered`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: JSON.stringify({
+        id: id
+    })
+  });
+}
+
+function exit() {
+  fetch(`https://u5_ui/exit`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: JSON.stringify({
+        1: 1
+    })
+  });
+}
+
+function getCloseAnimation(sectionId: number) {
+  const section = sections.value[sectionId]
+  if(section.options.xAlign === "left") {
+    return "slideLeft"
+  }
+  else if(section.options.xAlign === "right") {
+    return "slideRight"
+  }
+  else if(section.options.yAlign === "top") {
+    return "slideTop"
+  }
+  else if(section.options.yAlign === "bottom") {
+    return "slideBottom"
+  }
+
+  return "slideTop"
+}
+
+function closeSection(sectionId: number, onCloseId: number | undefined) {
   const section = document.getElementById(sectionId.toString())
   if(section) {
-    section.style.display = "none"
+    section.classList.add(getCloseAnimation(sectionId))
+  }
+  if(onCloseId) {
+    clickTriggered(onCloseId)
   }
 }
 
@@ -120,8 +169,10 @@ window.addEventListener('message', (event) => {
   if (event.data.type === 'addSection') {
     const section = {
       options: event.data.options,
-      components: []
+      components: [],
+      onCloseId: event.data.onCloseId
     }
+
     sections.value.push(section)
     
     fetch(`https://u5_ui/sendSectionId`, {
@@ -162,53 +213,53 @@ window.addEventListener('message', (event) => {
 
 })
 
-function clickTriggered(id: number) {
-  fetch(`https://u5_ui/clickTriggered`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: JSON.stringify({
-        id: id
-    })
-  });
-}
+window.addEventListener("keyup", (event) => {
+  if (event.key.toLowerCase() === "e") {
+    exit()
+  }
+})
 
 </script>
 
 <template>
-  <main class="p-10 h-svh w-svw">
+  <main class="h-svh w-svw">
     <section 
       v-for="(section, sectionId) in sections" 
       :key="sectionId" 
       :id="sectionId.toString()"
       :class="getClasses(section.options)"
       :style='section.options.style'
-      class="absolute top-0 left-0 bottom-0 right-0 bg-background rounded-md rounded-t-2xl rounded-r-2xl"
+      class="absolute m-10 px-5 pb-5 pt-2 top-0 left-0 bottom-0 right-0 bg-background rounded-md rounded-t-2xl rounded-r-2xl"
     >
-    <header class="h-20 flex justify-between p-2 items-center">
-      <img 
-        :v-if="section.options.image"
-        :src="section.options.image"
-        class="h-full"
-      >
-      <h1 
-        :v-if="section.options.title"
-        class="text-xl font-bold text-center"
-      >
-        {{ section.options.title }}
-      </h1>
+    <header class="h-14 grid">
       <svg
-        class="h-1/2 cursor-pointer"  
+        v-if="!section.options.showCloseButton === false"
+        class="h-6 ml-auto cursor-pointer hover:scale-105 transition-transform translate-x-3"  
         xmlns="http://www.w3.org/2000/svg" 
         viewBox="0 0 512 512"
-        @click="closeSection(sectionId)"
+        @click="closeSection(sectionId, section.onCloseId)"
       >
         <path 
           fill="currentColor"
           d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"
           />
       </svg>
+      <div 
+        :v-if="section.options.image || section.options.title"
+        class="flex items-center gap-5 justify-between"
+      >
+        <img 
+          :v-if="section.options.image"
+          :src="section.options.image"
+          class="h-7"
+        >
+        <h1 
+          :v-if="section.options.title"
+          class="text-xl font-bold text-center"
+        >
+          {{ section.options.title }}
+        </h1>
+      </div>
     </header>
       <component
         v-for="(component, componentId) in section.components"
@@ -219,7 +270,79 @@ function clickTriggered(id: number) {
         :style='component.style'
         @click="component.onClickId ? clickTriggered(component.onClickId) : null"
       >
+        <div :v-if="component.innerHTML" :inner-h-t-m-l="component.innerHTML"></div>
       </component>
     </section>
   </main>
 </template>
+
+<style scoped>
+
+  .slideTop {
+    animation: slideTop 2.5s forwards;
+  }
+
+  .slideBottom {
+    animation: slideBottom 2.5s forwards;
+  }
+
+  .slideLeft {
+    animation: slideLeft 2.5s forwards;
+  }
+
+  .slideRight {
+    animation: slideRight 2.5s forwards;
+  }
+
+  @keyframes slideTop {
+    0% {
+      transform: translateY(0);
+    }
+    99% {
+      transform: translateY(-100vh);
+    }
+    100% {
+      transform: translateY(-100vh);
+      display: none;
+    }
+  }
+
+  @keyframes slideBottom {
+    0% {
+      transform: translateY(0);
+    }
+    99% {
+      transform: translateY(100vh);
+    }
+    100% {
+      transform: translateY(100vh);
+      display: none;
+    }
+  }
+
+  @keyframes slideLeft {
+    0% {
+      transform: translateX(0);
+    }
+    99% {
+      transform: translateX(-100vw);
+    }
+    100% {
+      transform: translateX(-100vw);
+      display: none;
+    }
+  }
+
+  @keyframes slideRight {
+    0% {
+      transform: translateX(0);
+    }
+    99% {
+      transform: translateX(100vw);
+    }
+    100% {
+      transform: translateX(100vw);
+      display: none;
+    }
+  }
+</style>
