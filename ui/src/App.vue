@@ -93,7 +93,7 @@ const classesMap = {
   }
 }
 
-function getComponent(componentType: string) {
+function getComponentFromMap(componentType: string) {
   return componentMap[componentType]
 }
 
@@ -129,36 +129,23 @@ function getCloseAnimation(sectionId: number) {
   return "slideTop"
 }
 
-function sendElement(identifier: string) {
-  console.log("sendElement", identifier)
-  const element = document.querySelectorAll(identifier)
-  console.log(element)
-  fetch(`https://u5_ui/sendElement`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: JSON.stringify({
-        element: element
-    })
-  });
+function getElement(identifier: string) {
+  const elements = document.querySelectorAll(identifier)
+  const elementsHTML = []
+
+  for (let i = 0; i < elements.length; i++) {
+    const element = elements[i]
+    elementsHTML.push(element.outerHTML)
+  }
+ 
+  return elementsHTML
 }
 
-function sendComponentElement(sectionId: number, componentId: number) {
-  console.log("sendComponentElement", sectionId, componentId)
+function getComponent(sectionId: number, componentId: number) {
   const id = sectionId.toString() + componentId.toString()
-  console.log(id)
-  const element = document.getElementById(id)
-  console.log(element)
-  fetch(`https://u5_ui/sendElement`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: JSON.stringify({
-        element: element
-    })
-  });
+  const element = document.getElementById(id)?.outerHTML
+
+  return element
 }
 
 function clickTriggered(id: number, passThrough: any, sectionId: number, componentId: number) {
@@ -205,26 +192,12 @@ function exit() {
   });
 }
 
-function addSection(options: Section['options'], onCloseId: number | undefined, style: string, innerHTML: string) {
-  const section = {
-      options: options,
-      onCloseId: onCloseId,
-      style: style,
-      innerHTML: innerHTML,
-      components: []
-    }
+function addSection(section: Section) {
+  section.components = []
 
-    sections.value.push(section)
-    
-    fetch(`https://u5_ui/sendSectionId`, {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: JSON.stringify({
-          id: sections.value.length - 1
-      })
-    });
+  sections.value.push(section)
+
+  return sections.value.length - 1
 }
 
 function updateSection(id: number, options: Section['options']) {
@@ -233,6 +206,7 @@ function updateSection(id: number, options: Section['options']) {
 
 function closeSection(sectionId: number, onCloseId: number | undefined) {
   const section = document.getElementById(sectionId.toString())
+
   if(section) {
     section.classList.add(getCloseAnimation(sectionId))
   }
@@ -243,6 +217,7 @@ function closeSection(sectionId: number, onCloseId: number | undefined) {
 
 function openSection(sectionId: number) {
   const section = document.getElementById(sectionId.toString())
+
   if(section) {
     section.classList.remove(getCloseAnimation(sectionId))
   }
@@ -251,55 +226,73 @@ function openSection(sectionId: number) {
 function addComponent(sectionId: number, component: Section['components'][0]) {
   sections.value[sectionId].components.push(component)
 
-  fetch(`https://u5_ui/sendComponentId`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: JSON.stringify({
-        id: sections.value[sectionId].components.length - 1
-    })
-  });
+  return sections.value[sectionId].components.length - 1
 }
 
 function updateComponent(sectionId: number, componentId: number, component: Section['components'][0]) {
   sections.value[sectionId].components[componentId] = component
 }
 
+function handleCallback(data: any, callbackId: number) {
+  let response = null
+
+  if (data.type === 'addSection') {
+    response = addSection(data.section)
+  }
+
+  else if (data.type === "addComponent") {
+    response = addComponent(data.sectionId, data.component)
+  }
+
+  else if (data.type === "getElement") {
+    response = getElement(data.identifier)
+  }
+
+  else if (data.type === "getComponentElement") {
+    response = getComponent(data.sectionId, data.componentId)
+  }
+
+  fetch(`https://u5_ui/uiCallback`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: JSON.stringify({
+        callbackId: callbackId,
+        response: response
+    })
+  });
+
+}
 
 window.addEventListener('message', (event) => {
-  if (event.data.type === 'addSection') {
-    addSection(event.data.options, event.data.onCloseId, event.data.style, event.data.innerHTML)
-  }
-
-  else if (event.data.type === 'updateSection') {
-    updateSection(event.data.id, event.data.options)
-  }
-
-  else if (event.data.type === 'closeSection') {
-    closeSection(event.data.id, event.data.onCloseId)
-  }
-
-  else if (event.data.type === 'openSection') {
-    openSection(event.data.id)
-  }
-
-  else if (event.data.type === "addComponent") {
-    addComponent(event.data.sectionId, event.data.component)
+  if (event.data.type === 'uiCallback') {
+    const data = event.data
+    handleCallback(data.payload, data.callbackId)
   }
 
   else if (event.data.type === "updateComponent") {
-    updateComponent(event.data.sectionId, event.data.componentId, event.data.component)
+    const data = event.data.data
+    updateComponent(data.sectionId, data.componentId, data.component)
   }
 
-  else if (event.data.type === "getElement") {
-    sendElement(event.data.identifier)
+  else if (event.data.type === 'updateSection') {
+    const data = event.data.data
+    updateSection(data.id, data.options)
   }
 
-  else if (event.data.type === "getComponentElement") {
-    sendComponentElement(event.data.sectionId, event.data.componentId)
+  else if (event.data.type === 'closeSection') {
+    console.log("closeSection", event.data)
+    const data = event.data
+    
+    closeSection(data.sectionId, sections.value[data.sectionId].onCloseId)
   }
 
+  else if (event.data.type === 'openSection') {
+    console.log("openSection", event.data)
+    const data = event.data
+    openSection(data.sectionId)
+  }
 })
 
 window.addEventListener("keydown", (event) => {
@@ -311,7 +304,7 @@ window.addEventListener("keydown", (event) => {
 </script>
 
 <template>
-  <div class="p-10">
+  <div class="p-10" v-if="false">
     <Accordion headline="Test" content="Wow"/>
     <Alert headline="Test" content="Wow"/>
     <AlertDialog trigger="amk" headline="Test" content="Wow" > <img src="https://forum.cfx.re/user_avatar/forum.cfx.re/sifro/288/3966684_2.png"/> </AlertDialog>
@@ -334,7 +327,7 @@ window.addEventListener("keydown", (event) => {
         v-for="(component, componentId) in section.components"
         :key="componentId"
         :id="sectionId.toString() + componentId.toString()"
-        :is="getComponent(component.componentType)"
+        :is="getComponentFromMap(component.componentType)"
         v-bind="component.props"
         :style="component.style"
         @event-click="(passThrough: any) => component.onClickId && clickTriggered(component.onClickId, passThrough, sectionId, componentId)"

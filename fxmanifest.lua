@@ -24,7 +24,9 @@ shared_scripts{
 }
 
 client_scripts{
-	"client/*"
+	"client/main.lua",
+	"client/functions.lua",
+	"client/distanceChecker.lua",
 }
 
 server_scripts{
