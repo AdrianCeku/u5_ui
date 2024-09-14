@@ -22,18 +22,21 @@ const props = defineProps<{
 
 <template>
   <AlertDialog>
-    <AlertDialogTrigger>{{ props.trigger }}</AlertDialogTrigger>
+    <AlertDialogTrigger>
+      {{ props.trigger }}
+      <slot />
+    </AlertDialogTrigger>
     <AlertDialogContent>
       <AlertDialogHeader>
         <AlertDialogTitle>{{ props.headline }}</AlertDialogTitle>
         <AlertDialogDescription>
             {{ props.content }}
-            <slot />
+
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel @click="$emit('event-click', {accept: false})">{{ props.cancel ?? "cancel" }}</AlertDialogCancel>
-        <AlertDialogAction @click="$emit('event-click', {accept: true})">{{ props.action ?? "continue" }}</AlertDialogAction>
+        <AlertDialogCancel @click="$emit('event-click', {value: false})">{{ props.cancel ?? "cancel" }}</AlertDialogCancel>
+        <AlertDialogAction @click="$emit('event-click', {value: true})">{{ props.action ?? "continue" }}</AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>

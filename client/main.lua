@@ -6,6 +6,9 @@ local SECTION_ID = nil
 local WAITING_FOR_COMPONENT_ID = false
 local COMPONENT_ID = nil
 
+local WAITING_FOR_ELEMENT = false
+local ELEMENT = nil
+
 local onClickFunctions = {}
 local onInputFunctions = {}
 
@@ -78,6 +81,10 @@ function u5_ui.addComponent(sectionId, componentType, props, style, innerHTML, o
     return retVal
 end
 
+function u5_ui.getElement(identifier)
+    print("Getting element", identifier)
+end
+
 RegisterNUICallback('sendSectionId', function(data, cb)
     SECTION_ID = data.id
     WAITING_FOR_SECTION_ID = false
@@ -86,20 +93,39 @@ RegisterNUICallback('sendSectionId', function(data, cb)
 end)
 
 RegisterNUICallback('sendComponentId', function(data, cb)
+    print("Received component id", data.id)
     COMPONENT_ID = data.id
     WAITING_FOR_COMPONENT_ID = false
 
     cb('ok')
 end)
 
+RegisterNUICallback('sendElement', function(data, cb)
+    print("Received ELEMENT", json.encode(data.element))
+    ELEMENT = data.element
+    WAITING_FOR_ELEMENT = false
+
+    cb('ok')
+end)
+
 RegisterNUICallback('clickTriggered', function(data, cb)
-    onClickFunctions[data.id](data.passThrough)
+    local obj = {
+        sectionId = data.sectionId,
+        componentId = data.componentId
+    }
+
+    onClickFunctions[data.id](data.passThrough, obj)
     
     cb('ok')
 end)
 
 RegisterNUICallback('changeTriggered', function(data, cb)
-    onInputFunctions[data.id](data.value)
+    local obj = {
+        sectionId = data.sectionId,
+        componentId = data.componentId
+    }
+
+    onInputFunctions[data.id](data.value, obj)
     
     cb('ok')
 end)

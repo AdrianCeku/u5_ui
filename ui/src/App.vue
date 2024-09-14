@@ -1,25 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-import Accordion from '@/components/framework/Accordion.vue'
-import Alert from '@/components/framework/Alert.vue'
-import AlertDialog from '@/components/framework/AlertDialog.vue'
-import Input from '@/components/framework/Input.vue'
+import Accordion from '@/components/u5/Accordion.vue'
+import Alert from '@/components/u5/Alert.vue'
+import AlertDialog from '@/components/u5/AlertDialog.vue'
+import Input from '@/components/u5/Input.vue'
+import SectionU5 from '@/components/u5/SectionU5.vue'
 
 interface ComponentMap {
   [key: string]: any;
 }
-const componentMap: ComponentMap = {
-  "Accordion": Accordion,
-  "Alert": Alert,
-  "AlertDialog": AlertDialog,
-  "Input": Input,
-}
-
-function getComponent(componentType: string) {
-  return componentMap[componentType]
-}
-
 
 interface Section {
   options: {
@@ -48,8 +38,14 @@ interface Section {
     style?: string[]
   }[]
 }
-
 const sections = ref<Section[]>([])
+
+const componentMap: ComponentMap = {
+  "Accordion": Accordion,
+  "Alert": Alert,
+  "AlertDialog": AlertDialog,
+  "Input": Input,
+}
 
 const classesMap = {
   "xAlign": {
@@ -97,57 +93,22 @@ const classesMap = {
   }
 }
 
+function getComponent(componentType: string) {
+  return componentMap[componentType]
+}
+
 function getClasses(sectionOptions: Section['options']) {
   const classes = []
 
-  classes.push(classesMap.xAlign[sectionOptions.xAlign ?? "center"])
-  classes.push(classesMap.yAlign[sectionOptions.yAlign ?? "center"])
-  classes.push(classesMap.width[sectionOptions.width ?? "fit"])
-  classes.push(classesMap.height[sectionOptions.height ?? "fit"])
-  classes.push(classesMap.display[sectionOptions.display ?? "block"])
-  classes.push(classesMap.xOverflow[sectionOptions.xOverflow ?? "auto"])
-  classes.push(classesMap.yOverflow[sectionOptions.yOverflow ?? "auto"])
+  classes.push(classesMap.xAlign[sectionOptions.xAlign ?? "center"] ?? classesMap.xAlign["center"])
+  classes.push(classesMap.yAlign[sectionOptions.yAlign ?? "center"] ?? classesMap.yAlign["center"])
+  classes.push(classesMap.width[sectionOptions.width ?? "fit"] ?? classesMap.width["fit"])
+  classes.push(classesMap.height[sectionOptions.height ?? "fit"] ?? classesMap.height["fit"])
+  classes.push(classesMap.display[sectionOptions.display ?? "block"] ?? classesMap.display["block"])
+  classes.push(classesMap.xOverflow[sectionOptions.xOverflow ?? "auto"] ?? classesMap.xOverflow["auto"])
+  classes.push(classesMap.yOverflow[sectionOptions.yOverflow ?? "auto"] ?? classesMap.yOverflow["auto"])
 
   return classes
-}
-
-function clickTriggered(id: number, passThrough: any =null) {
-  fetch(`https://u5_ui/clickTriggered`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: JSON.stringify({
-        id: id,
-        passThrough: passThrough
-    })
-  });
-}
-
-function changeTriggered(id: number, value: any =null) {
-  console.log("changeTriggered")
-  fetch(`https://u5_ui/changeTriggered`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: JSON.stringify({
-        id: id,
-        value: value
-    })
-  });
-}
-
-function exit() {
-  fetch(`https://u5_ui/exit`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: JSON.stringify({
-        1: 1
-    })
-  });
 }
 
 function getCloseAnimation(sectionId: number) {
@@ -168,30 +129,64 @@ function getCloseAnimation(sectionId: number) {
   return "slideTop"
 }
 
-function closeSection(sectionId: number, onCloseId: number | undefined) {
-  const section = document.getElementById(sectionId.toString())
-  if(section) {
-    section.classList.add(getCloseAnimation(sectionId))
-  }
-  if(onCloseId) {
-    clickTriggered(onCloseId)
-  }
+function getElement(identifier: string) {
+  return document.querySelectorAll(identifier)
 }
 
-function openSection(sectionId: number) {
-  const section = document.getElementById(sectionId.toString())
-  if(section) {
-    section.classList.remove(getCloseAnimation(sectionId))
-  }
+function getComponentElement(sectionId: number, componentId: number) {
+  return document.getElementById(sectionId.toString() + componentId.toString())
 }
 
-window.addEventListener('message', (event) => {
-  if (event.data.type === 'addSection') {
-    const section = {
-      options: event.data.options,
-      onCloseId: event.data.onCloseId,
-      style: event.data.style,
-      innerHTML: event.data.innerHTML,
+function clickTriggered(id: number, passThrough: any, sectionId: number, componentId: number) {
+  console.log("clickTriggered", id, passThrough, sectionId, componentId)
+  fetch(`https://u5_ui/clickTriggered`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: JSON.stringify({
+        id: id,
+        passThrough: passThrough,
+        sectionId: sectionId,
+        componentId: componentId
+    })
+  });
+}
+
+function changeTriggered(id: number, value: any, sectionId: number, componentId: number) {
+  console.log("changeTriggered", id, value, sectionId, componentId)
+  fetch(`https://u5_ui/changeTriggered`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: JSON.stringify({
+        id: id,
+        value: value,
+        sectionId: sectionId,
+        componentId: componentId
+    })
+  });
+}
+
+function exit() {
+  fetch(`https://u5_ui/exit`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: JSON.stringify({
+        1: 1
+    })
+  });
+}
+
+function addSection(options: Section['options'], onCloseId: number | undefined, style: string, innerHTML: string) {
+  const section = {
+      options: options,
+      onCloseId: onCloseId,
+      style: style,
+      innerHTML: innerHTML,
       components: []
     }
 
@@ -206,31 +201,71 @@ window.addEventListener('message', (event) => {
           id: sections.value.length - 1
       })
     });
+}
+
+function updateSection(id: number, options: Section['options']) {
+  sections.value[id].options = options
+}
+
+function closeSection(sectionId: number, onCloseId: number | undefined) {
+  const section = document.getElementById(sectionId.toString())
+  if(section) {
+    section.classList.add(getCloseAnimation(sectionId))
+  }
+  if(onCloseId) {
+    clickTriggered(onCloseId, null, sectionId, -1)
+  }
+}
+
+function openSection(sectionId: number) {
+  const section = document.getElementById(sectionId.toString())
+  if(section) {
+    section.classList.remove(getCloseAnimation(sectionId))
+  }
+}
+
+function addComponent(sectionId: number, component: Section['components'][0]) {
+  sections.value[sectionId].components.push(component)
+
+  fetch(`https://u5_ui/sendComponentId`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: JSON.stringify({
+        id: sections.value[sectionId].components.length - 1
+    })
+  });
+}
+
+function updateComponent(sectionId: number, componentId: number, component: Section['components'][0]) {
+  sections.value[sectionId].components[componentId] = component
+}
+
+
+window.addEventListener('message', (event) => {
+  if (event.data.type === 'addSection') {
+    addSection(event.data.options, event.data.onCloseId, event.data.style, event.data.innerHTML)
   }
 
   else if (event.data.type === 'updateSection') {
-    sections.value[event.data.id].options = event.data.options
+    updateSection(event.data.id, event.data.options)
+  }
+
+  else if (event.data.type === 'closeSection') {
+    closeSection(event.data.id, event.data.onCloseId)
+  }
+
+  else if (event.data.type === 'openSection') {
+    openSection(event.data.id)
   }
 
   else if (event.data.type === "addComponent") {
-    console.log("addComponent")
-    console.log(event.data)
-    sections.value[event.data.sectionId].components.push(event.data.component)
-    console.log(sections.value[event.data.sectionId].components)
-
-    fetch(`https://u5_ui/sendComponentId`, {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: JSON.stringify({
-          id: sections.value[event.data.sectionId].components.length - 1
-      })
-    });
+    addComponent(event.data.sectionId, event.data.component)
   }
 
   else if (event.data.type === "updateComponent") {
-    sections.value[event.data.sectionId].components[event.data.componentId] = event.data.component
+    updateComponent(event.data.sectionId, event.data.componentId, event.data.component)
   }
 
 })
@@ -247,49 +282,21 @@ window.addEventListener("keydown", (event) => {
   <div class="p-10">
     <Accordion headline="Test" content="Wow"/>
     <Alert headline="Test" content="Wow"/>
-    <AlertDialog trigger="amk" headline="Test" content="Wow" />
+    <AlertDialog trigger="amk" headline="Test" content="Wow" > <img src="https://forum.cfx.re/user_avatar/forum.cfx.re/sifro/288/3966684_2.png"/> </AlertDialog>
     <Input label="hello" type="email"/>
   </div>
 
   <main class="h-svh w-svw">
-    <section 
+    <SectionU5 
       v-for="(section, sectionId) in sections" 
       :key="sectionId" 
       :id="sectionId.toString()"
       :class="getClasses(section.options)"
       :style='section.style'
-      class="absolute m-10 px-5 pb-5 pt-2 top-0 left-0 bottom-0 right-0 bg-background rounded-md rounded-t-2xl shadow-lg"
+      class="absolute top-0 left-0 bottom-0 right-0"
+      @event-close="closeSection(sectionId, section.onCloseId)"
+      :section="section"
     >
-    <header class="grid">
-      <svg
-        v-if="!section.options.showCloseButton === false"
-        class="h-6 ml-auto cursor-pointer hover:scale-105 transition-transform translate-x-3"  
-        xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 512 512"
-        @click="closeSection(sectionId, section.onCloseId)"
-      >
-        <path 
-          fill="currentColor"
-          d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"
-          />
-      </svg>
-      <div 
-        :v-if="section.options.image || section.options.title"
-        class="flex items-center gap-5 justify-between"
-      >
-        <img 
-          :v-if="section.options.image"
-          :src="section.options.image"
-          class="h-7"
-        >
-        <h1 
-          :v-if="section.options.title"
-          class="text-xl font-bold text-center"
-        >
-          {{ section.options.title }}
-        </h1>
-      </div>
-    </header>
       <div :v-if="section.innerHTML" v-html="section.innerHTML"></div>
       <component
         v-for="(component, componentId) in section.components"
@@ -297,13 +304,13 @@ window.addEventListener("keydown", (event) => {
         :id="sectionId.toString() + componentId.toString()"
         :is="getComponent(component.componentType)"
         v-bind="component.props"
-        :style='component.style'
-        @event-click="(passThrough: any) => component.onClickId ? clickTriggered(component.onClickId, passThrough) : null"
-        @event-input="(value: any) => component.onInputId ? changeTriggered(component.onInputId, value) : console.log('no change event')"
+        :style="component.style"
+        @event-click="(passThrough: any) => component.onClickId && clickTriggered(component.onClickId, passThrough, sectionId, componentId)"
+        @event-input="(value: any) => component.onInputId && changeTriggered(component.onInputId, value, sectionId, componentId)"
         >
         <div :v-if="component.innerHTML" v-html="component.innerHTML"></div>
       </component>
-    </section>
+    </SectionU5>
   </main>
 </template>
 

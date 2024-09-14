@@ -10,7 +10,7 @@ const props = defineProps({
 <template>
   <Alert>
     <AlertTitle>{{ props.headline }}</AlertTitle>
-    <AlertDescription @click="$emit('event-click')">
+    <AlertDescription>
       {{ props.content }}
         <slot />
     </AlertDescription>
