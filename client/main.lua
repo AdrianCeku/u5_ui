@@ -82,7 +82,42 @@ function u5_ui.addComponent(sectionId, componentType, props, style, innerHTML, o
 end
 
 function u5_ui.getElement(identifier)
-    print("Getting element", identifier)
+    SendNuiMessage(json.encode({
+        type = "getElement",
+        identifier = identifier
+    }))
+
+    WAITING_FOR_ELEMENT = true
+
+    while WAITING_FOR_ELEMENT do
+        print("Waiting for Element")
+        Citizen.Wait(10)
+    end
+
+    local retVal = ELEMENT
+    ELEMENT = nil
+    
+    return retVal
+end
+
+function u5_ui.getComponent(sectionId, componentId)
+    SendNuiMessage(json.encode({
+        type = "getComponentElement",
+        sectionId = sectionId,
+        componentId = componentId
+    }))
+
+    WAITING_FOR_ELEMENT = true
+
+    while WAITING_FOR_ELEMENT do
+        print("Waiting for Component")
+        Citizen.Wait(10)
+    end
+
+    local retVal = ELEMENT
+    ELEMENT = nil
+
+    return retVal
 end
 
 RegisterNUICallback('sendSectionId', function(data, cb)

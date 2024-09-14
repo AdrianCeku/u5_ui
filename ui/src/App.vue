@@ -129,12 +129,36 @@ function getCloseAnimation(sectionId: number) {
   return "slideTop"
 }
 
-function getElement(identifier: string) {
-  return document.querySelectorAll(identifier)
+function sendElement(identifier: string) {
+  console.log("sendElement", identifier)
+  const element = document.querySelectorAll(identifier)
+  console.log(element)
+  fetch(`https://u5_ui/sendElement`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: JSON.stringify({
+        element: element
+    })
+  });
 }
 
-function getComponentElement(sectionId: number, componentId: number) {
-  return document.getElementById(sectionId.toString() + componentId.toString())
+function sendComponentElement(sectionId: number, componentId: number) {
+  console.log("sendComponentElement", sectionId, componentId)
+  const id = sectionId.toString() + componentId.toString()
+  console.log(id)
+  const element = document.getElementById(id)
+  console.log(element)
+  fetch(`https://u5_ui/sendElement`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: JSON.stringify({
+        element: element
+    })
+  });
 }
 
 function clickTriggered(id: number, passThrough: any, sectionId: number, componentId: number) {
@@ -266,6 +290,14 @@ window.addEventListener('message', (event) => {
 
   else if (event.data.type === "updateComponent") {
     updateComponent(event.data.sectionId, event.data.componentId, event.data.component)
+  }
+
+  else if (event.data.type === "getElement") {
+    sendElement(event.data.identifier)
+  }
+
+  else if (event.data.type === "getComponentElement") {
+    sendComponentElement(event.data.sectionId, event.data.componentId)
   }
 
 })
