@@ -69,7 +69,6 @@ const props = defineProps<{
           class="text-xl font-bold text-center"
         >
           {{ section.options.title }}
-          {{ section.isDeleted ? 'im deleted' : '' }}
         </h1>
       </div>
     </header>

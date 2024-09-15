@@ -1,17 +1,11 @@
 <script setup lang="ts">
+// IMPORTS
 import { ref } from 'vue';
 
-import Accordion from '@/components/u5/Accordion.vue'
-import Alert from '@/components/u5/Alert.vue'
-import AlertDialog from '@/components/u5/AlertDialog.vue'
-import Input from '@/components/u5/Input.vue'
 import SectionU5 from '@/components/u5/SectionU5.vue'
 import ComponentU5 from '@/components/u5/ComponentU5.vue'
 
-
-interface ComponentMap {
-  [key: string]: any;
-}
+// TYPES
 
 interface Section {
   isDeleted: boolean
@@ -44,14 +38,10 @@ interface Section {
     style?: string[]
   }[]
 }
-const sections = ref<Section[]>([])
 
-const componentMap: ComponentMap = {
-  "Accordion": Accordion,
-  "Alert": Alert,
-  "AlertDialog": AlertDialog,
-  "Input": Input,
-}
+// VARIABLES
+
+const sections = ref<Section[]>([])
 
 const classesMap = {
   "xAlign": {
@@ -99,23 +89,7 @@ const classesMap = {
   }
 }
 
-function getComponentFromMap(componentType: string) {
-  return componentMap[componentType]
-}
-
-function getClasses(sectionOptions: Section['options']) {
-  const classes = []
-
-  classes.push(classesMap.xAlign[sectionOptions.xAlign ?? "center"] ?? classesMap.xAlign["center"])
-  classes.push(classesMap.yAlign[sectionOptions.yAlign ?? "center"] ?? classesMap.yAlign["center"])
-  classes.push(classesMap.width[sectionOptions.width ?? "fit"] ?? classesMap.width["fit"])
-  classes.push(classesMap.height[sectionOptions.height ?? "fit"] ?? classesMap.height["fit"])
-  classes.push(classesMap.display[sectionOptions.display ?? "block"] ?? classesMap.display["block"])
-  classes.push(classesMap.xOverflow[sectionOptions.xOverflow ?? "auto"] ?? classesMap.xOverflow["auto"])
-  classes.push(classesMap.yOverflow[sectionOptions.yOverflow ?? "auto"] ?? classesMap.yOverflow["auto"])
-
-  return classes
-}
+// HELPERS
 
 function getCloseAnimation(sectionId: number) {
   const section = sections.value[sectionId]
@@ -153,6 +127,22 @@ function getOpenAnimation(sectionId: number) {
   return "slideTopReverse"
 }
 
+function getClasses(sectionId: number) {
+  const classes = []
+  const section = sections.value[sectionId]
+  const options = section.options
+
+  classes.push(classesMap.xAlign[options.xAlign ?? "center"] ?? classesMap.xAlign["center"])
+  classes.push(classesMap.yAlign[options.yAlign ?? "center"] ?? classesMap.yAlign["center"])
+  classes.push(classesMap.width[options.width ?? "fit"] ?? classesMap.width["fit"])
+  classes.push(classesMap.height[options.height ?? "fit"] ?? classesMap.height["fit"])
+  classes.push(classesMap.display[options.display ?? "block"] ?? classesMap.display["block"])
+  classes.push(classesMap.xOverflow[options.xOverflow ?? "auto"] ?? classesMap.xOverflow["auto"])
+  classes.push(classesMap.yOverflow[options.yOverflow ?? "auto"] ?? classesMap.yOverflow["auto"])
+
+  return classes
+}
+
 function getElement(identifier: string) {
   const elements = document.querySelectorAll(identifier)
   const elementsHTML = []
@@ -165,12 +155,7 @@ function getElement(identifier: string) {
   return elementsHTML
 }
 
-function getComponent(sectionId: number, componentId: number) {
-  const id = sectionId.toString() + componentId.toString()
-  const element = document.getElementById(id)?.outerHTML
-
-  return element
-}
+// TRIGGERS
 
 function clickTriggered(id: number, passThrough: any, sectionId: number, componentId: number) {
   console.log("clickTriggered", id, passThrough, sectionId, componentId)
@@ -204,17 +189,7 @@ function changeTriggered(id: number, value: any, sectionId: number, componentId:
   });
 }
 
-function exit() {
-  fetch(`https://u5_ui/exit`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: JSON.stringify({
-        1: 1
-    })
-  });
-}
+// SECTIONS
 
 function addSection(section: Section) {
   section.components = []
@@ -226,21 +201,6 @@ function addSection(section: Section) {
 
 function updateSection(id: number, section: Section) {
   sections.value[id] = section
-}
-
-function closeSection(sectionId: number) {
-  const onCloseId = sections.value[sectionId].onCloseId
-  const section = document.getElementById(sectionId.toString())
-
-  if(section) {
-    section.classList.remove(getOpenAnimation(sectionId))
-    section.classList.add(getCloseAnimation(sectionId))
-  }
-  if(onCloseId) {
-    clickTriggered(onCloseId, null, sectionId, -1)
-  }
-
-  sections.value[sectionId].isOpen = false
 }
 
 function openSection(sectionId: number) {
@@ -259,6 +219,27 @@ function openSection(sectionId: number) {
   sections.value[sectionId].isOpen = true
 }
 
+function closeSection(sectionId: number) {
+  const onCloseId = sections.value[sectionId].onCloseId
+  const section = document.getElementById(sectionId.toString())
+
+  if(section) {
+    section.classList.remove(getOpenAnimation(sectionId))
+    section.classList.add(getCloseAnimation(sectionId))
+  }
+  if(onCloseId) {
+    clickTriggered(onCloseId, null, sectionId, -1)
+  }
+
+  sections.value[sectionId].isOpen = false
+}
+
+function deleteSection(sectionId: number) {
+  sections.value[sectionId].isDeleted = true
+}
+
+// COMPONENTS
+
 function addComponent(sectionId: number, component: Section['components'][0]) {
   sections.value[sectionId].components.push(component)
 
@@ -269,13 +250,18 @@ function updateComponent(sectionId: number, componentId: number, component: Sect
   sections.value[sectionId].components[componentId] = component
 }
 
-function deleteSection(sectionId: number) {
-  sections.value[sectionId].isDeleted = true
-}
-
 function deleteComponent(sectionId: number, componentId: number) {
   sections.value[sectionId].components[componentId].isDeleted = true
 }
+
+function getComponent(sectionId: number, componentId: number) {
+  const id = sectionId.toString() + componentId.toString()
+  const element = document.getElementById(id)?.outerHTML
+
+  return element
+}
+
+// MESSAGE HANDLING
 
 function handleCallback(data: any, callbackId: number) {
   let response = null
@@ -340,7 +326,6 @@ window.addEventListener('message', (event) => {
   }
 
   else if (event.data.type === 'deleteComponent') {
-    console.log("deleteComponent", event.data)
     deleteComponent(event.data.sectionId, event.data.componentId)
   }
 
@@ -353,6 +338,20 @@ window.addEventListener('message', (event) => {
   }
 
 })
+
+// EXIT
+
+function exit() {
+  fetch(`https://u5_ui/exit`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: JSON.stringify({
+        1: 1
+    })
+  });
+}
 
 window.addEventListener("keydown", (event) => {
   if (event.key.toLowerCase() === "alt") {
@@ -375,7 +374,7 @@ window.addEventListener("keydown", (event) => {
       v-for="(section, sectionId) in sections" 
       :key="sectionId" 
       :id="sectionId.toString()"
-      :class="getClasses(section.options)"
+      :class="getClasses(sectionId)"
       :style='section.style'
       class="absolute top-0 left-0 bottom-0 right-0"
       @event-close="closeSection(sectionId)"
