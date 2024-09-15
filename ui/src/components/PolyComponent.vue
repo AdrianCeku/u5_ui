@@ -41,7 +41,7 @@ const props = defineProps<{
     v-if="!props.component.isDeleted"
     :is="getComponent(props.component.componentType)" 
     v-bind="props.component.props"
-    @event-click="(passThrough: any) => $emit('event-click', passThrough)"
+    @event-click="(data: any) => $emit('event-click', data)"
     @event-input="(value: any) => $emit('event-input', value)"
     >
         <div :v-if="component.innerHTML" v-html="component.innerHTML"></div>
