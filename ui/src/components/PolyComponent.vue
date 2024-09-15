@@ -8,7 +8,7 @@ interface ComponentMap {
   [key: string]: any;
 }
 
-interface component {    
+interface Component {    
     isDeleted: boolean
     componentType: string
     props?: {
@@ -32,7 +32,7 @@ function getComponent(componentType: string) {
 }
 
 const props = defineProps<{
-  component : component
+  component : Component
 }>()
 </script>
 
