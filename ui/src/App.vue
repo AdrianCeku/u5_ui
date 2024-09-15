@@ -6,6 +6,8 @@ import Alert from '@/components/u5/Alert.vue'
 import AlertDialog from '@/components/u5/AlertDialog.vue'
 import Input from '@/components/u5/Input.vue'
 import SectionU5 from '@/components/u5/SectionU5.vue'
+import ComponentU5 from '@/components/u5/ComponentU5.vue'
+
 
 interface ComponentMap {
   [key: string]: any;
@@ -222,8 +224,8 @@ function addSection(section: Section) {
   return sections.value.length - 1
 }
 
-function updateSection(id: number, options: Section['options']) {
-  sections.value[id].options = options
+function updateSection(id: number, section: Section) {
+  sections.value[id] = section
 }
 
 function closeSection(sectionId: number) {
@@ -269,7 +271,6 @@ function updateComponent(sectionId: number, componentId: number, component: Sect
 
 function deleteSection(sectionId: number) {
   sections.value[sectionId].isDeleted = true
-  console.log("deleteSection", sections.value[sectionId])
 }
 
 function deleteComponent(sectionId: number, componentId: number) {
@@ -321,30 +322,34 @@ window.addEventListener('message', (event) => {
 
   else if (event.data.type === 'updateSection') {
     const data = event.data.data
-    updateSection(data.id, data.options)
+    updateSection(data.sectionId, data.section)
   }
 
   else if (event.data.type === 'closeSection') {
-    console.log("closeSection", event.data)
     const data = event.data
-    
     closeSection(data.sectionId)
   }
 
   else if (event.data.type === 'openSection') {
-    console.log("openSection", event.data)
     const data = event.data
     openSection(data.sectionId)
   }
 
   else if (event.data.type === 'deleteSection') {
-    console.log("deleteSection", event.data)
     deleteSection(event.data.sectionId)
   }
 
   else if (event.data.type === 'deleteComponent') {
     console.log("deleteComponent", event.data)
     deleteComponent(event.data.sectionId, event.data.componentId)
+  }
+
+  else if (event.data.type === 'restoreSection') {
+    sections.value[event.data.sectionId].isDeleted = false
+  }
+
+  else if (event.data.type === 'restoreComponent') {
+    sections.value[event.data.sectionId].components[event.data.componentId].isDeleted = false
   }
 
 })
@@ -375,22 +380,17 @@ window.addEventListener("keydown", (event) => {
       class="absolute top-0 left-0 bottom-0 right-0"
       @event-close="closeSection(sectionId)"
       :section="section"
-      v-if="section.isDeleted === false"
       >
       <div :v-if="section.innerHTML" v-html="section.innerHTML"></div>
-      <component
+      <ComponentU5
         v-for="(component, componentId) in section.components"
-        v-if="component.isDeleted === false"
         :key="componentId"
         :id="sectionId.toString() + componentId.toString()"
-        :is="getComponentFromMap(component.componentType)"
-        v-bind="component.props"
+        :component="component"
         :style="component.style"
         @event-click="(passThrough: any) => component.onClickId && clickTriggered(component.onClickId, passThrough, sectionId, componentId)"
         @event-input="(value: any) => component.onInputId && changeTriggered(component.onInputId, value, sectionId, componentId)"
-        >
-        <div :v-if="component.innerHTML" v-html="component.innerHTML"></div>
-      </component>
+      />
     </SectionU5>
   </main>
 </template>

@@ -75,18 +75,18 @@ function u5_ui.getSection(sectionId, includeHTML)
 end
 
 
-function u5_ui.updateSection(sectionId, newOptions)
+function u5_ui.updateSection(sectionId, section)
     sectionId = tostring(sectionId)
     if not SECTIONS[sectionId] then
         return
     end
 
-    SECTIONS[sectionId].options = newOptions
+    SECTIONS[sectionId] = section
 
     SendNUIMessage({
         type = "updateSection",
         sectionId = sectionId,
-        newOptions = newOptions
+        section = section
     })
 end
 

@@ -40,6 +40,7 @@ const props = defineProps<{
 <template>
     <section 
       class="m-10 px-5 pb-5 pt-2 bg-background rounded-md rounded-t-2xl shadow-lg"
+      v-if="!section.isDeleted"
     >
     <header class="grid">
       <svg
