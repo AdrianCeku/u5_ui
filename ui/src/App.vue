@@ -12,6 +12,8 @@ interface ComponentMap {
 }
 
 interface Section {
+  isDeleted: boolean
+  isOpen: boolean
   options: {
     title?: string
     image?: string
@@ -24,10 +26,12 @@ interface Section {
     xOverflow?: "visible" | "hidden" | "scroll" | "auto"
     yOverflow?: "visible" | "hidden" | "scroll" | "auto"
   }
-  onCloseId?: number
   style?: string
   innerHTML?: string
+  onOpenId?: number
+  onCloseId?: number
   components: {    
+    isDeleted: boolean
     componentType: string
     props?: {
       [key: string]: any
@@ -129,6 +133,24 @@ function getCloseAnimation(sectionId: number) {
   return "slideTop"
 }
 
+function getOpenAnimation(sectionId: number) {
+  const section = sections.value[sectionId]
+  if(section.options.xAlign === "left") {
+    return "slideLeftReverse"
+  }
+  else if(section.options.xAlign === "right") {
+    return "slideRightReverse"
+  }
+  else if(section.options.yAlign === "top") {
+    return "slideTopReverse"
+  }
+  else if(section.options.yAlign === "bottom") {
+    return "slideBottomReverse"
+  }
+
+  return "slideTopReverse"
+}
+
 function getElement(identifier: string) {
   const elements = document.querySelectorAll(identifier)
   const elementsHTML = []
@@ -204,23 +226,35 @@ function updateSection(id: number, options: Section['options']) {
   sections.value[id].options = options
 }
 
-function closeSection(sectionId: number, onCloseId: number | undefined) {
+function closeSection(sectionId: number) {
+  const onCloseId = sections.value[sectionId].onCloseId
   const section = document.getElementById(sectionId.toString())
 
   if(section) {
+    section.classList.remove(getOpenAnimation(sectionId))
     section.classList.add(getCloseAnimation(sectionId))
   }
   if(onCloseId) {
     clickTriggered(onCloseId, null, sectionId, -1)
   }
+
+  sections.value[sectionId].isOpen = false
 }
 
 function openSection(sectionId: number) {
+  const onOpenId = sections.value[sectionId].onOpenId
   const section = document.getElementById(sectionId.toString())
 
   if(section) {
     section.classList.remove(getCloseAnimation(sectionId))
+    section.classList.add(getOpenAnimation(sectionId))
   }
+
+  if(onOpenId) {
+    clickTriggered(onOpenId, null, sectionId, -1)
+  }
+
+  sections.value[sectionId].isOpen = true
 }
 
 function addComponent(sectionId: number, component: Section['components'][0]) {
@@ -231,6 +265,15 @@ function addComponent(sectionId: number, component: Section['components'][0]) {
 
 function updateComponent(sectionId: number, componentId: number, component: Section['components'][0]) {
   sections.value[sectionId].components[componentId] = component
+}
+
+function deleteSection(sectionId: number) {
+  sections.value[sectionId].isDeleted = true
+  console.log("deleteSection", sections.value[sectionId])
+}
+
+function deleteComponent(sectionId: number, componentId: number) {
+  sections.value[sectionId].components[componentId].isDeleted = true
 }
 
 function handleCallback(data: any, callbackId: number) {
@@ -285,7 +328,7 @@ window.addEventListener('message', (event) => {
     console.log("closeSection", event.data)
     const data = event.data
     
-    closeSection(data.sectionId, sections.value[data.sectionId].onCloseId)
+    closeSection(data.sectionId)
   }
 
   else if (event.data.type === 'openSection') {
@@ -293,6 +336,17 @@ window.addEventListener('message', (event) => {
     const data = event.data
     openSection(data.sectionId)
   }
+
+  else if (event.data.type === 'deleteSection') {
+    console.log("deleteSection", event.data)
+    deleteSection(event.data.sectionId)
+  }
+
+  else if (event.data.type === 'deleteComponent') {
+    console.log("deleteComponent", event.data)
+    deleteComponent(event.data.sectionId, event.data.componentId)
+  }
+
 })
 
 window.addEventListener("keydown", (event) => {
@@ -319,12 +373,13 @@ window.addEventListener("keydown", (event) => {
       :class="getClasses(section.options)"
       :style='section.style'
       class="absolute top-0 left-0 bottom-0 right-0"
-      @event-close="closeSection(sectionId, section.onCloseId)"
+      @event-close="closeSection(sectionId)"
       :section="section"
-    >
+      >
       <div :v-if="section.innerHTML" v-html="section.innerHTML"></div>
       <component
         v-for="(component, componentId) in section.components"
+        :v-if="!component.isDeleted"
         :key="componentId"
         :id="sectionId.toString() + componentId.toString()"
         :is="getComponentFromMap(component.componentType)"
@@ -357,16 +412,28 @@ window.addEventListener("keydown", (event) => {
     animation: slideRight 2.5s forwards;
   }
 
+  .slideTopReverse {
+    animation: slideTopReverse 0.5s forwards;
+  }
+
+  .slideBottomReverse {
+    animation: slideBottomReverse 0.5s forwards;
+  }
+
+  .slideLeftReverse {
+    animation: slideLeftReverse 0.5s forwards;
+  }
+
+  .slideRightReverse {
+    animation: slideRightReverse 0.5s forwards;
+  }
+
   @keyframes slideTop {
     0% {
       transform: translateY(0);
     }
-    99% {
-      transform: translateY(-100vh);
-    }
     100% {
       transform: translateY(-100vh);
-      visibility: hidden;
     }
   }
 
@@ -374,12 +441,8 @@ window.addEventListener("keydown", (event) => {
     0% {
       transform: translateY(0);
     }
-    99% {
-      transform: translateY(100vh);
-    }
     100% {
       transform: translateY(100vh);
-      visibility: hidden;
     }
   }
 
@@ -387,12 +450,8 @@ window.addEventListener("keydown", (event) => {
     0% {
       transform: translateX(0);
     }
-    99% {
-      transform: translateX(-100vw);
-    }
     100% {
       transform: translateX(-100vw);
-      visibility: hidden;
     }
   }
 
@@ -400,12 +459,45 @@ window.addEventListener("keydown", (event) => {
     0% {
       transform: translateX(0);
     }
-    99% {
+
+    100% {
+      transform: translateX(100vw);
+    }
+  }
+
+  @keyframes slideTopReverse {
+    0% {
+      transform: translateY(-100vh);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideBottomReverse {
+    0% {
+      transform: translateY(100vh);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideLeftReverse {
+    0% {
+      transform: translateX(-100vw);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideRightReverse {
+    0% {
       transform: translateX(100vw);
     }
     100% {
-      transform: translateX(100vw);
-      visibility: hidden;
+      transform: translateX(0);
     }
   }
 </style>

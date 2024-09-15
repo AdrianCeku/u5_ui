@@ -1,6 +1,8 @@
 <script setup lang="ts">
 
 interface Section {
+  isDeleted: boolean
+  isOpen: boolean
   options: {
     title?: string
     image?: string
@@ -13,10 +15,12 @@ interface Section {
     xOverflow?: "visible" | "hidden" | "scroll" | "auto"
     yOverflow?: "visible" | "hidden" | "scroll" | "auto"
   }
-  onCloseId?: number
   style?: string
   innerHTML?: string
+  onOpenId?: number
+  onCloseId?: number
   components: {    
+    isDeleted: boolean
     componentType: string
     props?: {
       [key: string]: any
@@ -64,6 +68,7 @@ const props = defineProps<{
           class="text-xl font-bold text-center"
         >
           {{ section.options.title }}
+          {{ section.isDeleted ? 'im deleted' : '' }}
         </h1>
       </div>
     </header>
