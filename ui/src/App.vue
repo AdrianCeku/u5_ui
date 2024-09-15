@@ -375,11 +375,12 @@ window.addEventListener("keydown", (event) => {
       class="absolute top-0 left-0 bottom-0 right-0"
       @event-close="closeSection(sectionId)"
       :section="section"
+      v-if="section.isDeleted === false"
       >
       <div :v-if="section.innerHTML" v-html="section.innerHTML"></div>
       <component
         v-for="(component, componentId) in section.components"
-        :v-if="!component.isDeleted"
+        v-if="!component.isDeleted === false"
         :key="componentId"
         :id="sectionId.toString() + componentId.toString()"
         :is="getComponentFromMap(component.componentType)"
