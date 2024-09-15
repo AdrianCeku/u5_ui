@@ -7,13 +7,25 @@ import PolyComponent from '@/components/PolyComponent.vue'
 
 // TYPES
 
-interface Section {
-  isDeleted: boolean
-  isOpen: boolean
+export interface Component {    
+    componentType: string
+    style?: string
+    wrapperStyle?: string
+    innerHTML?: string
+    onClickId?: number
+    onInputId?: number
+    isDeleted: boolean
+    props?: {
+      [key: string]: any
+    }
+  }
+
+export interface Section {
   options: {
     title?: string
     image?: string
     showCloseButton?: boolean
+    noDefaultStyle?: boolean
     xAlign?: "left" | "center" | "right"
     yAlign?: "top" | "center" | "bottom"
     width?: "full" | "twoThirds" | "half" | "third" | "quarter" | "fit"
@@ -22,21 +34,13 @@ interface Section {
     xOverflow?: "visible" | "hidden" | "scroll" | "auto"
     yOverflow?: "visible" | "hidden" | "scroll" | "auto"
   }
+  isOpen?: boolean
   style?: string
+  wrapperStyle?: string
   innerHTML?: string
-  onOpenId?: number
-  onCloseId?: number
-  components: {    
-    isDeleted: boolean
-    componentType: string
-    props?: {
-      [key: string]: any
-    }
-    innerHTML?: string
-    onClickId?: number
-    onInputId?: number
-    style?: string[]
-  }[]
+  onVisibilityChangeFunctionId?: number
+  isDeleted: boolean
+  components: Component[]
 }
 
 // VARIABLES
@@ -128,9 +132,14 @@ function getOpenAnimation(sectionId: number) {
 }
 
 function getClasses(sectionId: number) {
-  const classes = []
   const section = sections.value[sectionId]
   const options = section.options
+  
+  if(options.noDefaultStyle) {
+    return []
+  }
+
+  const classes = ["absolute", "top-0", "left-0", "bottom-0", "right-0"]
 
   classes.push(classesMap.xAlign[options.xAlign ?? "center"] ?? classesMap.xAlign["center"])
   classes.push(classesMap.yAlign[options.yAlign ?? "center"] ?? classesMap.yAlign["center"])
@@ -157,34 +166,16 @@ function getElement(identifier: string) {
 
 // TRIGGERS
 
-function clickTriggered(onClickFunctionId: number, data: any, sectionId: number, componentId: number) {
-  console.log("clickTriggered", onClickFunctionId, data, sectionId, componentId)
-  fetch(`https://u5_ui/clickTriggered`, {
+function visibilityChanged(onVisibilityChangeFunctionId: number, isVisible: boolean, sectionId: number) {
+  fetch(`https://u5_ui/visibilityChanged`, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json; charset=UTF-8',
     },
     body: JSON.stringify({
-        onClickFunctionId: onClickFunctionId,
-        data: data,
         sectionId: sectionId,
-        componentId: componentId
-    })
-  });
-}
-
-function inputTriggered(onInputFunctionId: number, value: any, sectionId: number, componentId: number) {
-  console.log("inputTriggered", onInputFunctionId, value, sectionId, componentId)
-  fetch(`https://u5_ui/inputTriggered`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: JSON.stringify({
-        onInputFunctionId: onInputFunctionId,
-        value: value,
-        sectionId: sectionId,
-        componentId: componentId
+        isVisible: isVisible,
+        onVisibilityChangeFunctionId: onVisibilityChangeFunctionId
     })
   });
 }
@@ -195,8 +186,9 @@ function addSection(section: Section) {
   section.components = []
 
   sections.value.push(section)
+  const sectionId = sections.value.length - 1
 
-  return sections.value.length - 1
+  return sectionId
 }
 
 function updateSection(id: number, section: Section) {
@@ -204,7 +196,7 @@ function updateSection(id: number, section: Section) {
 }
 
 function openSection(sectionId: number) {
-  const onOpenId = sections.value[sectionId].onOpenId
+  const onVisChangeId = sections.value[sectionId].onVisibilityChangeFunctionId
   const section = document.getElementById(sectionId.toString())
 
   if(section) {
@@ -212,23 +204,23 @@ function openSection(sectionId: number) {
     section.classList.add(getOpenAnimation(sectionId))
   }
 
-  if(onOpenId) {
-    clickTriggered(onOpenId, null, sectionId, -1)
+  if(onVisChangeId) {
+    visibilityChanged(onVisChangeId, true, sectionId)
   }
 
   sections.value[sectionId].isOpen = true
 }
 
 function closeSection(sectionId: number) {
-  const onCloseId = sections.value[sectionId].onCloseId
+  const onVisChangeId = sections.value[sectionId].onVisibilityChangeFunctionId 
   const section = document.getElementById(sectionId.toString())
 
   if(section) {
     section.classList.remove(getOpenAnimation(sectionId))
     section.classList.add(getCloseAnimation(sectionId))
   }
-  if(onCloseId) {
-    clickTriggered(onCloseId, null, sectionId, -1)
+  if(onVisChangeId) {
+    visibilityChanged(onVisChangeId, false, sectionId)
   }
 
   sections.value[sectionId].isOpen = false
@@ -292,7 +284,6 @@ function handleCallback(data: any, callbackId: number) {
         response: response
     })
   });
-
 }
 
 window.addEventListener('message', (event) => {
@@ -375,8 +366,7 @@ window.addEventListener("keydown", (event) => {
       :key="sectionId" 
       :id="sectionId.toString()"
       :class="getClasses(sectionId)"
-      :style='section.style'
-      class="absolute top-0 left-0 bottom-0 right-0"
+      :style="section.wrapperStyle"
       @event-close="closeSection(sectionId)"
       :section="section"
       >
@@ -385,10 +375,10 @@ window.addEventListener("keydown", (event) => {
         v-for="(component, componentId) in section.components"
         :key="componentId"
         :id="sectionId.toString() + componentId.toString()"
+        :style="component.wrapperStyle"
         :component="component"
-        :style="component.style"
-        @event-click="(data: any) => component.onClickId && clickTriggered(component.onClickId, data, sectionId, componentId)"
-        @event-input="(value: any) => component.onInputId && inputTriggered(component.onInputId, value, sectionId, componentId)"
+        :sectionId="sectionId"
+        :componentId="componentId"
       />
     </Section>
   </main>
@@ -431,73 +421,112 @@ window.addEventListener("keydown", (event) => {
   @keyframes slideTop {
     0% {
       transform: translateY(0);
+      visibility: visible;
+    }
+    99% {
+      visibility: hidden;
     }
     100% {
       transform: translateY(-100vh);
+      visibility: hidden;
     }
   }
 
   @keyframes slideBottom {
     0% {
       transform: translateY(0);
+      visibility: visible;
+    }
+    99% {
+      visibility: hidden;
     }
     100% {
       transform: translateY(100vh);
+      visibility: hidden;
     }
   }
 
   @keyframes slideLeft {
     0% {
       transform: translateX(0);
+      visibility: visible;
+    }
+    99% {
+      visibility: hidden;
     }
     100% {
       transform: translateX(-100vw);
+      visibility: hidden;
     }
   }
 
   @keyframes slideRight {
     0% {
       transform: translateX(0);
+      visibility: visible;
     }
-
+    99% {
+      visibility: hidden;
+    }
     100% {
       transform: translateX(100vw);
+      visibility: hidden;
     }
   }
 
   @keyframes slideTopReverse {
     0% {
       transform: translateY(-100vh);
+      visibility: hidden;
+    }
+    1% {
+      visibility: visible;
     }
     100% {
       transform: translateY(0);
+      visibility: visible;
     }
   }
 
   @keyframes slideBottomReverse {
     0% {
       transform: translateY(100vh);
+      visibility: hidden;
+    }
+    1% {
+      visibility: visible;
     }
     100% {
       transform: translateY(0);
+      visibility: visible;
     }
   }
 
   @keyframes slideLeftReverse {
     0% {
       transform: translateX(-100vw);
+      visibility: hidden;
+    }
+    1% {
+      visibility: visible;
     }
     100% {
       transform: translateX(0);
+      visibility: visible;
     }
   }
 
   @keyframes slideRightReverse {
     0% {
       transform: translateX(100vw);
+      visibility: hidden;
+    }
+    1% {
+      visibility: visible;
     }
     100% {
       transform: translateX(0);
+      visibility: visible;
     }
   }
 </style>

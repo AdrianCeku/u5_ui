@@ -4,11 +4,17 @@ u5_ui = {}
 
 local SECTIONS = {}
 
+--+--+--+--+--+--+ IDS +--+--+--+--+--+--+
+
 local ON_CLICK_FUNCTIONS = {}
 local ON_CLICK_FUNCTIONS_ID = 0
 
 local ON_INPUT_FUNCTIONS = {}
 local ON_INPUT_FUNCTIONS_ID = 0
+
+local ON_VISIBILITY_CHANGE_FUNCTIONS = {}
+local ON_VISIBILITY_CHANGE_FUNCTIONS_ID = 0
+
 
 local function getOnClickFunctionsId()
     local id = ON_CLICK_FUNCTIONS_ID
@@ -24,27 +30,28 @@ local function getOnInputFunctionsId()
     return tostring(id)
 end
 
-function u5_ui.addSection(options, style, innerHTML, isOpen, onOpen, onClose)
-    local onOpenId = nil
+local function getOnVisibilityChangeFunctionsId()
+    local id = ON_VISIBILITY_CHANGE_FUNCTIONS_ID
+    ON_VISIBILITY_CHANGE_FUNCTIONS_ID = ON_VISIBILITY_CHANGE_FUNCTIONS_ID + 1
+    
+    return tostring(id)
+end
 
-    if onOpen then
-        onOpenId = getOnClickFunctionsId()
-        ON_CLICK_FUNCTIONS[onOpenId] = onOpen
-    end
+--+--+--+--+--+--+ SECTION +--+--+--+--+--+--+
 
-    local onCloseId = nil
+function u5_ui.addSection(options, style, wrapperStyle, innerHTML, isOpen, onVisibilityChange)
+    local onVisibilityChangeId = nil
 
-    if onClose then
-        onCloseId = getOnClickFunctionsId()
-        ON_CLICK_FUNCTIONS[onCloseId] = onClose
+    if onVisibilityChange then
+        onVisibilityChangeId = getOnVisibilityChangeFunctionsId()
+        ON_VISIBILITY_CHANGE_FUNCTIONS[onVisibilityChangeId] = onVisibilityChange
     end
 
     local section = {
         options = options,
         style = style,
         innerHTML = innerHTML,
-        onOpenId = onOpenId,
-        onCloseId = onCloseId,
+        onVisibilityChangeFunctionId = onVisibilityChangeId,
         isOpen = isOpen,
     }
 
@@ -57,6 +64,7 @@ function u5_ui.addSection(options, style, innerHTML, isOpen, onOpen, onClose)
     
     SECTIONS[sectionId] = {
         options = options,
+        wrapperStyle = wrapperStyle,
         style = style,
         innerHTML = innerHTML,
         onClose = onClose,
@@ -69,6 +77,7 @@ end
 
 function u5_ui.getSection(sectionId, includeHTML)
     sectionId = tostring(sectionId)
+
     if not SECTIONS[sectionId] then
         return nil
     end
@@ -93,6 +102,7 @@ end
 
 function u5_ui.updateSection(sectionId, section)
     sectionId = tostring(sectionId)
+
     if not SECTIONS[sectionId] then
         return
     end
@@ -108,8 +118,7 @@ end
 
 function u5_ui.openSection(sectionId)
     sectionId = tostring(sectionId)
-    print("Opening section", sectionId)
-    print(SECTIONS[sectionId])
+
     if not SECTIONS[sectionId] then
         return
     end
@@ -122,8 +131,7 @@ end
 
 function u5_ui.closeSection(sectionId)
     sectionId = tostring(sectionId)
-    print("Closing section", sectionId)
-    print(SECTIONS[sectionId])
+
     if not SECTIONS[sectionId] then
         return
     end
@@ -136,6 +144,7 @@ end
 
 function u5_ui.bindSectionToCoords(sectionId, coords)
     sectionId = tostring(sectionId)
+
     local range = 2
     local marker = {
         range = 20,
@@ -160,13 +169,12 @@ end
 
 function u5_ui.deleteSection(sectionId)
     sectionId = tostring(sectionId)
-    print("Deleting section", sectionId)
     if not SECTIONS[sectionId] then
         return
     end
 
     SECTIONS[sectionId].isDeleted = true
-    print("Sending message")
+
     SendNUIMessage({
         type = "deleteSection",
         sectionId = sectionId
@@ -187,6 +195,8 @@ function u5_ui.restoreSection(sectionId)
         sectionId = sectionId
     })
 end
+
+--+--+--+--+--+--+ COMPONENT +--+--+--+--+--+--+
 
 function u5_ui.addComponent(sectionId, componentType, props, style, innerHTML, onClick, onInput)
     sectionId = tostring(sectionId)
@@ -229,7 +239,6 @@ function u5_ui.addComponent(sectionId, componentType, props, style, innerHTML, o
 end
 
 function u5_ui.getComponent(sectionId, componentId, includeHTML)
-    print(json.encode(SECTIONS))
     sectionId = tostring(sectionId)
     componentId = tostring(componentId)
 
@@ -332,16 +341,17 @@ function u5_ui.getElementsHTML(identifier)
     return elements
 end
 
+--+--+--+--+--+--+ CALLBACKS +--+--+--+--+--+--+
+
 RegisterNUICallback('clickTriggered', function(data, cb)
     local onClickFunctionId = data.onClickFunctionId
-    local data = data.data
 
-    local elementIds = {
-        sectionId = data.sectionId,
-        componentId = data.componentId
+    local ids = {
+        sectionId = tostring(data.sectionId),
+        componentId = tostring(data.componentId)
     }
 
-    ON_CLICK_FUNCTIONS[onClickFunctionId](data, elementIds)
+    ON_CLICK_FUNCTIONS[onClickFunctionId](data, ids)
     
     cb('ok')
 end)
@@ -350,12 +360,22 @@ RegisterNUICallback('inputTriggered', function(data, cb)
     local onInputFunctionId = data.onInputFunctionId
     local value = data.value
 
-    local elementIds = {
-        sectionId = data.sectionId,
-        componentId = data.componentId
+    local ids = {
+        sectionId = tostring(data.sectionId),
+        componentId = tostring(data.componentId)
     }
 
-    ON_INPUT_FUNCTIONS[onInputFunctionId](value, elementIds)
+    ON_INPUT_FUNCTIONS[onInputFunctionId](value, ids)
+    
+    cb('ok')
+end)
+
+RegisterNUICallback('visibilityChanged', function(data, cb)
+    local onVisibilityChangeFunctionId = data.onVisibilityChangeFunctionId
+    local isVisible = data.isVisible
+    local sectionId = tostring(data.sectionId)
+
+    ON_VISIBILITY_CHANGE_FUNCTIONS[onVisibilityChangeFunctionId](isVisible, sectionId)
     
     cb('ok')
 end)
@@ -366,9 +386,13 @@ RegisterNUICallback('exit', function(data, cb)
     cb('ok')
 end)
 
+--+--+--+--+--+--+ EXPORTS +--+--+--+--+--+--+
+
 exports("getObject", function()
     return u5_ui
 end)
+
+--+--+--+--+--+--+ CONTROLS +--+--+--+--+--+--+
 
 Citizen.CreateThread(function()
     while true do

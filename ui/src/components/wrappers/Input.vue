@@ -8,7 +8,7 @@ const props = defineProps<{
     placeholder?: string
 }>()
 
-let inputValue = ref<string | number | undefined>()
+let inputValue = ref<string | number | undefined>("")
 
 </script>
 

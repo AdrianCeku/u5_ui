@@ -1,36 +1,6 @@
 <script setup lang="ts">
 
-interface Section {
-  isDeleted: boolean
-  isOpen: boolean
-  options: {
-    title?: string
-    image?: string
-    showCloseButton?: boolean
-    xAlign?: "left" | "center" | "right"
-    yAlign?: "top" | "center" | "bottom"
-    width?: "full" | "twoThirds" | "half" | "third" | "quarter" | "fit"
-    height?: "full" | "twoThirds" | "half" | "third" | "quarter" | "fit"
-    display?: "flex" | "grid" | "block"
-    xOverflow?: "visible" | "hidden" | "scroll" | "auto"
-    yOverflow?: "visible" | "hidden" | "scroll" | "auto"
-  }
-  style?: string
-  innerHTML?: string
-  onOpenId?: number
-  onCloseId?: number
-  components: {    
-    isDeleted: boolean
-    componentType: string
-    props?: {
-      [key: string]: any
-    }
-    innerHTML?: string
-    onClickId?: number
-    onInputId?: number
-    style?: string[]
-  }[]
-}
+import type { Section } from '../App.vue'
 
 const props = defineProps<{
     section: Section
@@ -41,10 +11,14 @@ const props = defineProps<{
     <section 
       class="m-10 px-5 pb-5 pt-2 bg-background rounded-md rounded-t-2xl shadow-lg"
       v-if="!props.section.isDeleted"
+      :style='props.section.style'
     >
-    <header class="grid">
+    <header 
+      class="grid"
+      v-if="props.section.options.showCloseButton || props.section.options.image || props.section.options.title"
+    >
       <svg
-        v-if="!props.section.options.showCloseButton === false"
+        v-if="props.section.options.showCloseButton"
         class="h-6 ml-auto cursor-pointer hover:scale-105 transition-transform translate-x-3"  
         xmlns="http://www.w3.org/2000/svg" 
         viewBox="0 0 512 512"
@@ -57,7 +31,7 @@ const props = defineProps<{
       </svg>
       <div 
         :v-if="props.section.options.image || props.section.options.title"
-        class="flex items-center gap-5 justify-between"
+        class="flex items-center gap-5 justify-between mb-3"
       >
         <img 
           :v-if="props.section.options.image"
