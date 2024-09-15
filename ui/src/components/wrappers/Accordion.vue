@@ -6,19 +6,18 @@ const props = defineProps({
     content: String
 })
 
-let isOpen: boolean = true
+let isOpen: boolean = false
 
 function getState() {
-    const retval = isOpen
     isOpen = !isOpen
-    return retval
+    return isOpen
 }
 </script>
 
 <template>
     <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
-            <AccordionTrigger @click="$emit('event-click', {value: getState()})">{{ props.headline }}</AccordionTrigger>
+            <AccordionTrigger @click="$emit('event-click', {isOpen: getState()})">{{ props.headline }}</AccordionTrigger>
             <AccordionContent>
                 {{ props.content }}
                 <slot />

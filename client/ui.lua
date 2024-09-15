@@ -4,23 +4,39 @@ u5_ui = {}
 
 local SECTIONS = {}
 
-local onClickFunctions = {}
-local onInputFunctions = {}
+local ON_CLICK_FUNCTIONS = {}
+local ON_CLICK_FUNCTIONS_ID = 0
 
+local ON_INPUT_FUNCTIONS = {}
+local ON_INPUT_FUNCTIONS_ID = 0
+
+local function getOnClickFunctionsId()
+    local id = ON_CLICK_FUNCTIONS_ID
+    ON_CLICK_FUNCTIONS_ID = ON_CLICK_FUNCTIONS_ID + 1
+    
+    return tostring(id)
+end
+
+local function getOnInputFunctionsId()
+    local id = ON_INPUT_FUNCTIONS_ID
+    ON_INPUT_FUNCTIONS_ID = ON_INPUT_FUNCTIONS_ID + 1
+    
+    return tostring(id)
+end
 
 function u5_ui.addSection(options, style, innerHTML, isOpen, onOpen, onClose)
     local onOpenId = nil
 
     if onOpen then
-        onOpenId = #onClickFunctions + 1
-        onClickFunctions[onOpenId] = onOpen
+        onOpenId = getOnClickFunctionsId()
+        ON_CLICK_FUNCTIONS[onOpenId] = onOpen
     end
 
     local onCloseId = nil
 
     if onClose then
-        onCloseId = #onClickFunctions + 1
-        onClickFunctions[onCloseId] = onClose
+        onCloseId = getOnClickFunctionsId()
+        ON_CLICK_FUNCTIONS[onCloseId] = onClose
     end
 
     local section = {
@@ -177,15 +193,15 @@ function u5_ui.addComponent(sectionId, componentType, props, style, innerHTML, o
     local onClickId = nil
 
     if onClick then
-        onClickId = #onClickFunctions + 1
-        onClickFunctions[onClickId] = onClick
+        onClickId = #ON_CLICK_FUNCTIONS + 1
+        ON_CLICK_FUNCTIONS[onClickId] = onClick
     end
 
     local onInputId = nil
 
     if onInput then
-        onInputId = #onInputFunctions + 1
-        onInputFunctions[onInputId] = onInput
+        onInputId = #ON_INPUT_FUNCTIONS + 1
+        ON_INPUT_FUNCTIONS[onInputId] = onInput
     end
 
     local component = {
@@ -317,23 +333,29 @@ function u5_ui.getElementsHTML(identifier)
 end
 
 RegisterNUICallback('clickTriggered', function(data, cb)
-    local obj = {
+    local onClickFunctionId = data.onClickFunctionId
+    local data = data.data
+
+    local elementIds = {
         sectionId = data.sectionId,
         componentId = data.componentId
     }
 
-    onClickFunctions[data.id](data.passThrough, obj)
+    ON_CLICK_FUNCTIONS[onClickFunctionId](data, elementIds)
     
     cb('ok')
 end)
 
-RegisterNUICallback('changeTriggered', function(data, cb)
-    local obj = {
+RegisterNUICallback('inputTriggered', function(data, cb)
+    local onInputFunctionId = data.onInputFunctionId
+    local value = data.value
+
+    local elementIds = {
         sectionId = data.sectionId,
         componentId = data.componentId
     }
 
-    onInputFunctions[data.id](data.value, obj)
+    ON_INPUT_FUNCTIONS[onInputFunctionId](value, elementIds)
     
     cb('ok')
 end)

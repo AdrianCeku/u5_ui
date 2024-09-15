@@ -19,8 +19,8 @@ let inputValue = ref<string | number | undefined>()
             v-model="inputValue"
             id="input"
             :type="props.type"
-            @click="$emit('event-click', {value: inputValue})"
-            @input="$emit('event-input', {value: inputValue})"
+            @click="$emit('event-click', inputValue)"
+            @input="$emit('event-input', inputValue)"
             :placeholder="props.placeholder"
         />
     </div>

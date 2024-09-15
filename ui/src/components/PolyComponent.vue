@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Accordion from './Accordion.vue'
-import Alert from './Alert.vue'
-import AlertDialog from './AlertDialog.vue'
-import Input from './Input.vue'
+import Accordion from './wrappers/Accordion.vue'
+import Alert from './wrappers/Alert.vue'
+import AlertDialog from './wrappers/AlertDialog.vue'
+import Input from './wrappers/Input.vue'
 
 interface ComponentMap {
   [key: string]: any;

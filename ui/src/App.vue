@@ -2,8 +2,8 @@
 // IMPORTS
 import { ref } from 'vue';
 
-import SectionU5 from '@/components/u5/SectionU5.vue'
-import ComponentU5 from '@/components/u5/ComponentU5.vue'
+import Section from '@/components/Section.vue'
+import PolyComponent from '@/components/PolyComponent.vue'
 
 // TYPES
 
@@ -157,31 +157,31 @@ function getElement(identifier: string) {
 
 // TRIGGERS
 
-function clickTriggered(id: number, passThrough: any, sectionId: number, componentId: number) {
-  console.log("clickTriggered", id, passThrough, sectionId, componentId)
+function clickTriggered(onClickFunctionId: number, data: any, sectionId: number, componentId: number) {
+  console.log("clickTriggered", onClickFunctionId, data, sectionId, componentId)
   fetch(`https://u5_ui/clickTriggered`, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json; charset=UTF-8',
     },
     body: JSON.stringify({
-        id: id,
-        passThrough: passThrough,
+        onClickFunctionId: onClickFunctionId,
+        data: data,
         sectionId: sectionId,
         componentId: componentId
     })
   });
 }
 
-function changeTriggered(id: number, value: any, sectionId: number, componentId: number) {
-  console.log("changeTriggered", id, value, sectionId, componentId)
-  fetch(`https://u5_ui/changeTriggered`, {
+function inputTriggered(onInputFunctionId: number, value: any, sectionId: number, componentId: number) {
+  console.log("inputTriggered", onInputFunctionId, value, sectionId, componentId)
+  fetch(`https://u5_ui/inputTriggered`, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json; charset=UTF-8',
     },
     body: JSON.stringify({
-        id: id,
+        onInputFunctionId: onInputFunctionId,
         value: value,
         sectionId: sectionId,
         componentId: componentId
@@ -370,7 +370,7 @@ window.addEventListener("keydown", (event) => {
   </div>
 
   <main class="h-svh w-svw">
-    <SectionU5 
+    <Section 
       v-for="(section, sectionId) in sections" 
       :key="sectionId" 
       :id="sectionId.toString()"
@@ -381,16 +381,16 @@ window.addEventListener("keydown", (event) => {
       :section="section"
       >
       <div :v-if="section.innerHTML" v-html="section.innerHTML"></div>
-      <ComponentU5
+      <PolyComponent
         v-for="(component, componentId) in section.components"
         :key="componentId"
         :id="sectionId.toString() + componentId.toString()"
         :component="component"
         :style="component.style"
-        @event-click="(passThrough: any) => component.onClickId && clickTriggered(component.onClickId, passThrough, sectionId, componentId)"
-        @event-input="(value: any) => component.onInputId && changeTriggered(component.onInputId, value, sectionId, componentId)"
+        @event-click="(data: any) => component.onClickId && clickTriggered(component.onClickId, data, sectionId, componentId)"
+        @event-input="(value: any) => component.onInputId && inputTriggered(component.onInputId, value, sectionId, componentId)"
       />
-    </SectionU5>
+    </Section>
   </main>
 </template>
 

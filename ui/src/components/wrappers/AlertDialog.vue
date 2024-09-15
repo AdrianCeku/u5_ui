@@ -35,8 +35,8 @@ const props = defineProps<{
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel @click="$emit('event-click', {value: false})">{{ props.cancel ?? "cancel" }}</AlertDialogCancel>
-        <AlertDialogAction @click="$emit('event-click', {value: true})">{{ props.action ?? "continue" }}</AlertDialogAction>
+        <AlertDialogCancel @click="$emit('event-input', false)">{{ props.cancel ?? "cancel" }}</AlertDialogCancel>
+        <AlertDialogAction @click="$emit('event-input', true)">{{ props.action ?? "continue" }}</AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>
