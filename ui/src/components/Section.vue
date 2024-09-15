@@ -40,11 +40,11 @@ const props = defineProps<{
 <template>
     <section 
       class="m-10 px-5 pb-5 pt-2 bg-background rounded-md rounded-t-2xl shadow-lg"
-      v-if="!section.isDeleted"
+      v-if="!props.section.isDeleted"
     >
     <header class="grid">
       <svg
-        v-if="!section.options.showCloseButton === false"
+        v-if="!props.section.options.showCloseButton === false"
         class="h-6 ml-auto cursor-pointer hover:scale-105 transition-transform translate-x-3"  
         xmlns="http://www.w3.org/2000/svg" 
         viewBox="0 0 512 512"
@@ -56,19 +56,19 @@ const props = defineProps<{
           />
       </svg>
       <div 
-        :v-if="section.options.image || section.options.title"
+        :v-if="props.section.options.image || props.section.options.title"
         class="flex items-center gap-5 justify-between"
       >
         <img 
-          :v-if="section.options.image"
-          :src="section.options.image"
+          :v-if="props.section.options.image"
+          :src="props.section.options.image"
           class="h-7"
         >
         <h1 
-          :v-if="section.options.title"
+          :v-if="props.section.options.title"
           class="text-xl font-bold text-center"
         >
-          {{ section.options.title }}
+          {{ props.section.options.title }}
         </h1>
       </div>
     </header>
