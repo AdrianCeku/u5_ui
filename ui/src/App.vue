@@ -10,7 +10,6 @@ import PolyComponent from '@/components/PolyComponent.vue'
 export interface Component {    
     componentType: string
     style?: string
-    wrapperStyle?: string
     innerHTML?: string
     onClickId?: number
     onInputId?: number
@@ -26,6 +25,8 @@ export interface Section {
     image?: string
     showCloseButton?: boolean
     noDefaultStyle?: boolean
+    noPositioningStyle?: boolean
+    noPresetStyle?: boolean
     xAlign?: "left" | "center" | "right"
     yAlign?: "top" | "center" | "bottom"
     width?: "full" | "twoThirds" | "half" | "third" | "quarter" | "fit"
@@ -93,6 +94,23 @@ const classesMap = {
   }
 }
 
+const positioningStyleClasses = [
+  "absolute", 
+  "top-0", 
+  "left-0", 
+  "bottom-0", 
+  "right-0",
+]
+
+const defaultStyleCLasses = [
+  "m-10",
+  "px-5",
+  "pb-5",
+  "pt-2",
+  "bg-background",
+  "rounded-md",
+]
+
 // HELPERS
 
 function getCloseAnimation(sectionId: number) {
@@ -134,20 +152,26 @@ function getOpenAnimation(sectionId: number) {
 function getClasses(sectionId: number) {
   const section = sections.value[sectionId]
   const options = section.options
-  
-  if(options.noDefaultStyle) {
-    return []
+
+  const classes = []
+
+  if(!options.noPresetStyle) {
+    classes.push(classesMap.width[options.width ?? "fit"] ?? classesMap.width["fit"])
+    classes.push(classesMap.height[options.height ?? "fit"] ?? classesMap.height["fit"])
+    classes.push(classesMap.display[options.display ?? "block"] ?? classesMap.display["block"])
+    classes.push(classesMap.xOverflow[options.xOverflow ?? "auto"] ?? classesMap.xOverflow["auto"])
+    classes.push(classesMap.yOverflow[options.yOverflow ?? "auto"] ?? classesMap.yOverflow["auto"])
   }
 
-  const classes = ["absolute", "top-0", "left-0", "bottom-0", "right-0"]
+  if(!options.noDefaultStyle) {
+    classes.push(...defaultStyleCLasses)
+  }
 
-  classes.push(classesMap.xAlign[options.xAlign ?? "center"] ?? classesMap.xAlign["center"])
-  classes.push(classesMap.yAlign[options.yAlign ?? "center"] ?? classesMap.yAlign["center"])
-  classes.push(classesMap.width[options.width ?? "fit"] ?? classesMap.width["fit"])
-  classes.push(classesMap.height[options.height ?? "fit"] ?? classesMap.height["fit"])
-  classes.push(classesMap.display[options.display ?? "block"] ?? classesMap.display["block"])
-  classes.push(classesMap.xOverflow[options.xOverflow ?? "auto"] ?? classesMap.xOverflow["auto"])
-  classes.push(classesMap.yOverflow[options.yOverflow ?? "auto"] ?? classesMap.yOverflow["auto"])
+  if(!options.noPositioningStyle) {
+    classes.push(classesMap.xAlign[options.xAlign ?? "center"] ?? classesMap.xAlign["center"])
+    classes.push(classesMap.yAlign[options.yAlign ?? "center"] ?? classesMap.yAlign["center"])
+    classes.push(...positioningStyleClasses)
+  }
 
   return classes
 }
@@ -375,7 +399,6 @@ window.addEventListener("keydown", (event) => {
         v-for="(component, componentId) in section.components"
         :key="componentId"
         :id="sectionId.toString() + componentId.toString()"
-        :style="component.wrapperStyle"
         :component="component"
         :sectionId="sectionId"
         :componentId="componentId"

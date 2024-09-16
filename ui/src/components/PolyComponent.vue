@@ -59,14 +59,14 @@ function inputTriggered(onInputFunctionId: number, value: any, sectionId: number
 </script>
 
 <template>
-    <component 
+  <component 
     v-if="!props.component.isDeleted"
     :is="getComponent(props.component.componentType)" 
     v-bind="props.component.props"
     :style="props.component.style"
     @event-click="(data: any) => props.component.onClickId && clickTriggered(props.component.onClickId, data, props.sectionId, props.componentId)"
     @event-input="(value: any) => props.component.onInputId && inputTriggered(props.component.onInputId, value, props.sectionId, props.componentId)"
-    >
-        <div :v-if="component.innerHTML" v-html="component.innerHTML"></div>
-    </component>
+  >
+    <div :v-if="component.innerHTML" v-html="component.innerHTML"></div>
+  </component>
 </template>

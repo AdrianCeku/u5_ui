@@ -50,9 +50,12 @@ function u5_ui.addSection(options, style, wrapperStyle, innerHTML, isOpen, onVis
     local section = {
         options = options,
         style = style,
+        wrapperStyle = wrapperStyle,
         innerHTML = innerHTML,
-        onVisibilityChangeFunctionId = onVisibilityChangeId,
         isOpen = isOpen,
+        onVisibilityChangeFunctionId = onVisibilityChangeId,
+        isDeleted = false,
+        components = {}
     }
 
     local sectionId = sendToUI({
@@ -62,15 +65,7 @@ function u5_ui.addSection(options, style, wrapperStyle, innerHTML, isOpen, onVis
 
     sectionId = tostring(sectionId)
     
-    SECTIONS[sectionId] = {
-        options = options,
-        wrapperStyle = wrapperStyle,
-        style = style,
-        innerHTML = innerHTML,
-        onClose = onClose,
-        isDeleted = false,
-        components = {}
-    }
+    SECTIONS[sectionId] = section
 
     return sectionId
 end
@@ -217,10 +212,10 @@ function u5_ui.addComponent(sectionId, componentType, props, style, innerHTML, o
     local component = {
         componentType = componentType,
         props = props,
+        style = style,
+        innerHTML = innerHTML,
         onClickId = onClickId,
         onInputId = onInputId,
-        innerHTML = innerHTML,
-        style = style,
         isDeleted = false
     }
 
