@@ -25,8 +25,8 @@ export interface Section {
     image?: string
     showCloseButton?: boolean
     noDefaultStyle?: boolean
-    noPositioningStyle?: boolean
     noPresetStyle?: boolean
+    noWrapperPositioningStyle?: boolean
     xAlign?: "left" | "center" | "right"
     yAlign?: "top" | "center" | "bottom"
     width?: "full" | "twoThirds" | "half" | "third" | "quarter" | "fit"
@@ -48,7 +48,15 @@ export interface Section {
 
 const sections = ref<Section[]>([])
 
-const classesMap = {
+const positioningStyleClasses = [
+  "absolute", 
+  "top-0", 
+  "left-0", 
+  "bottom-0", 
+  "right-0",
+]
+
+const positioningClassesMap = {
   "xAlign": {
     "left": "mr-auto",
     "center": "mx-auto",
@@ -75,41 +83,25 @@ const classesMap = {
     "quarter": "h-1/4",
     "fit" : "h-fit"
   },
-  "display": {
-    "flex": "flex",
-    "grid": "grid",
-    "block": "block"
-  },
-  "xOverflow": {
-    "visible": "overflow-x-visible",
-    "hidden": "overflow-x-hidden",
-    "scroll": "overflow-x-scroll",
-    "auto": "overflow-x-auto"
-  },
-  "yOverflow": {
-    "visible": "overflow-y-visible",
-    "hidden": "overflow-y-hidden",
-    "scroll": "overflow-y-scroll",
-    "auto": "overflow-y-auto"
-  }
+
 }
 
-const positioningStyleClasses = [
-  "absolute", 
-  "top-0", 
-  "left-0", 
-  "bottom-0", 
-  "right-0",
-]
+function getPositioningClasses(sectionId: number) {
+  const section = sections.value[sectionId]
+  const options = section.options
+  
+  const classes = []
 
-const defaultStyleCLasses = [
-  "m-10",
-  "px-5",
-  "pb-5",
-  "pt-2",
-  "bg-background",
-  "rounded-md",
-]
+  if(!options.noWrapperPositioningStyle) {
+    classes.push(positioningClassesMap.width[options.width ?? "fit"] ?? positioningClassesMap.width["fit"])
+    classes.push(positioningClassesMap.height[options.height ?? "fit"] ?? positioningClassesMap.height["fit"])
+    classes.push(positioningClassesMap.xAlign[options.xAlign ?? "center"] ?? positioningClassesMap.xAlign["center"])
+    classes.push(positioningClassesMap.yAlign[options.yAlign ?? "center"] ?? positioningClassesMap.yAlign["center"])
+    classes.push(...positioningStyleClasses)
+  }
+
+  return classes
+}
 
 // HELPERS
 
@@ -147,33 +139,6 @@ function getOpenAnimation(sectionId: number) {
   }
 
   return "slideTopReverse"
-}
-
-function getClasses(sectionId: number) {
-  const section = sections.value[sectionId]
-  const options = section.options
-
-  const classes = []
-
-  if(!options.noPresetStyle) {
-    classes.push(classesMap.width[options.width ?? "fit"] ?? classesMap.width["fit"])
-    classes.push(classesMap.height[options.height ?? "fit"] ?? classesMap.height["fit"])
-    classes.push(classesMap.display[options.display ?? "block"] ?? classesMap.display["block"])
-    classes.push(classesMap.xOverflow[options.xOverflow ?? "auto"] ?? classesMap.xOverflow["auto"])
-    classes.push(classesMap.yOverflow[options.yOverflow ?? "auto"] ?? classesMap.yOverflow["auto"])
-  }
-
-  if(!options.noDefaultStyle) {
-    classes.push(...defaultStyleCLasses)
-  }
-
-  if(!options.noPositioningStyle) {
-    classes.push(classesMap.xAlign[options.xAlign ?? "center"] ?? classesMap.xAlign["center"])
-    classes.push(classesMap.yAlign[options.yAlign ?? "center"] ?? classesMap.yAlign["center"])
-    classes.push(...positioningStyleClasses)
-  }
-
-  return classes
 }
 
 function getElement(identifier: string) {
@@ -389,7 +354,8 @@ window.addEventListener("keydown", (event) => {
       v-for="(section, sectionId) in sections" 
       :key="sectionId" 
       :id="sectionId.toString()"
-      :class="getClasses(sectionId)"
+      :class="getPositioningClasses(sectionId)"
+      class="m-10"
       :style="section.wrapperStyle"
       @event-close="closeSection(sectionId)"
       :section="section"
