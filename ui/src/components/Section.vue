@@ -61,7 +61,7 @@ const props = defineProps<{
       <div
         :style='props.section.style'
         :class="getClasses()"
-        class="max-h-full scroll-bar-styles"
+        class="max-h-full max-w-full scroll-bar-styles"
       >
         <header 
           class="grid sticky top-0 bg-background pt-2"
