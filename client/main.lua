@@ -4,6 +4,36 @@ SECTIONS = {}
 
 --+--+--+--+--+--+ CONTROLS +--+--+--+--+--+--+
 
+local disableControl = {
+    -- Look controls
+    1,
+    2, 
+    3,
+    4,
+    5,
+    6,
+    -- Sprint
+    21,
+    -- Attack / Aim
+    24,
+    25,
+    68,
+    69,
+    70,
+    91,
+    92,
+    114,
+    121,
+    140,
+    141,
+    142,
+    257,
+    263,
+    264,
+    331,
+
+}
+
 local isUiOpen = false
 
 RegisterNuiCallback("focusInput", function(data, cb)
@@ -28,14 +58,9 @@ RegisterCommand("focusui", function()
     Citizen.CreateThread(function()
         while isUiOpen do 
             Citizen.Wait(0)
-            DisableControlAction(0, 1, true)
-            DisableControlAction(0, 2, true)
-            DisableControlAction(0, 3, true)
-            DisableControlAction(0, 4, true)
-            DisableControlAction(0, 5, true)
-            DisableControlAction(0, 6, true)
-            DisableControlAction(0, 24, true)
-            DisableControlAction(0, 25, true)
+            for i=1, #disableControl do
+                DisableControlAction(0, disableControl[i], true)
+            end
         end
     end)
 end, false)
