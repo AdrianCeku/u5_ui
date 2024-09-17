@@ -54,99 +54,6 @@ let config: Config
 
 const sections = ref<Section[]>([])
 
-const positioningStyleClasses = [
-  "absolute", 
-  "top-0", 
-  "left-0", 
-  "bottom-0", 
-  "right-0",
-]
-
-const positioningClassesMap = {
-  "xAlign": {
-    "left": "mr-auto",
-    "center": "mx-auto",
-    "right": "ml-auto"
-  },
-  "yAlign": {
-    "top": "mb-auto",
-    "center": "my-auto",
-    "bottom": "mt-auto"
-  },
-  "width": {
-    "full": "w-full",
-    "twoThirds": "w-2/3",
-    "half": "w-1/2",
-    "third": "w-1/3",
-    "quarter": "w-1/4",
-    "fit" : "w-fit"
-  },
-  "height": {
-    "full": "h-full",
-    "twoThirds": "h-2/3",
-    "half": "h-1/2",
-    "third": "h-1/3",
-    "quarter": "h-1/4",
-    "fit" : "h-fit"
-  },
-
-}
-// HELPERS
-
-function getPositioningClasses(sectionId: number) {
-  const section = sections.value[sectionId]
-  const options = section.options
-  
-  const classes = []
-
-  if(!options.noWrapperPositioningStyle) {
-    classes.push(positioningClassesMap.width[options.width ?? "fit"] ?? positioningClassesMap.width["fit"])
-    classes.push(positioningClassesMap.height[options.height ?? "fit"] ?? positioningClassesMap.height["fit"])
-    classes.push(positioningClassesMap.xAlign[options.xAlign ?? "center"] ?? positioningClassesMap.xAlign["center"])
-    classes.push(positioningClassesMap.yAlign[options.yAlign ?? "center"] ?? positioningClassesMap.yAlign["center"])
-    classes.push(...positioningStyleClasses)
-  }
-
-  return classes
-}
-
-
-function getCloseAnimation(sectionId: number) {
-  const section = sections.value[sectionId]
-  if(section.options.xAlign === "left") {
-    return "slideLeft"
-  }
-  else if(section.options.xAlign === "right") {
-    return "slideRight"
-  }
-  else if(section.options.yAlign === "top") {
-    return "slideTop"
-  }
-  else if(section.options.yAlign === "bottom") {
-    return "slideBottom"
-  }
-
-  return "slideTop"
-}
-
-function getOpenAnimation(sectionId: number) {
-  const section = sections.value[sectionId]
-  if(section.options.xAlign === "left") {
-    return "slideLeftReverse"
-  }
-  else if(section.options.xAlign === "right") {
-    return "slideRightReverse"
-  }
-  else if(section.options.yAlign === "top") {
-    return "slideTopReverse"
-  }
-  else if(section.options.yAlign === "bottom") {
-    return "slideBottomReverse"
-  }
-
-  return "slideTopReverse"
-}
-
 function getElementsHTML(identifier: string) {
   const elements = document.querySelectorAll(identifier)
   const elementsHTML = []
@@ -157,22 +64,6 @@ function getElementsHTML(identifier: string) {
   }
  
   return elementsHTML
-}
-
-// TRIGGERS
-
-function visibilityChanged(onVisibilityChangeFunctionId: number, isVisible: boolean, sectionId: number) {
-  fetch(`https://u5_ui/visibilityChanged`, {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json; charset=UTF-8",
-    },
-    body: JSON.stringify({
-        sectionId: sectionId,
-        isVisible: isVisible,
-        onVisibilityChangeFunctionId: onVisibilityChangeFunctionId
-    })
-  });
 }
 
 // SECTIONS
@@ -188,40 +79,6 @@ function addSection(section: Section) {
 
 function updateSection(id: number, section: Section) {
   sections.value[id] = section
-}
-
-function openSection(sectionId: number) {
-  const onVisChangeId = sections.value[sectionId].onVisibilityChangeFunctionId
-  const section = document.getElementById(sectionId.toString())
-
-  if(sections.value[sectionId].isOpen) return
-  if(!section) return
-
-  section.classList.remove(getCloseAnimation(sectionId))
-  section.classList.add(getOpenAnimation(sectionId))
-
-  if(onVisChangeId) {
-    visibilityChanged(onVisChangeId, true, sectionId)
-  }
-
-  sections.value[sectionId].isOpen = true
-}
-
-function closeSection(sectionId: number) {
-  const onVisChangeId = sections.value[sectionId].onVisibilityChangeFunctionId 
-  const section = document.getElementById(sectionId.toString())
-
-  if(!sections.value[sectionId].isOpen) return
-  if(!section) return
-
-  section.classList.remove(getOpenAnimation(sectionId))
-  section.classList.add(getCloseAnimation(sectionId))
-  
-  if(onVisChangeId) {
-    visibilityChanged(onVisChangeId, false, sectionId)
-  }
-
-  sections.value[sectionId].isOpen = false
 }
 
 function deleteSection(sectionId: number) {
@@ -300,16 +157,6 @@ window.addEventListener("message", (event) => {
     updateSection(data.sectionId, data.section)
   }
 
-  else if (event.data.type === "closeSection") {
-    const data = event.data
-    closeSection(data.sectionId)
-  }
-
-  else if (event.data.type === "openSection") {
-    const data = event.data
-    openSection(data.sectionId)
-  }
-
   else if (event.data.type === "deleteSection") {
     deleteSection(event.data.sectionId)
   }
@@ -380,18 +227,12 @@ setTimeout(() => {
     <Section 
       v-for="(section, sectionId) in sections" 
       :key="sectionId" 
-      :id="sectionId.toString()"
-      :class="getPositioningClasses(sectionId)"
-      class="m-10"
-      :style="section.wrapperStyle"
-      @event-close="closeSection(sectionId)"
       :section="section"
+      :section-id="sectionId"
       >
-      <div :v-if="section.innerHTML" v-html="section.innerHTML"></div>
       <PolyComponent
         v-for="(component, componentId) in section.components"
         :key="componentId"
-        :id="sectionId.toString() + componentId.toString()"
         :component="component"
         :sectionId="sectionId"
         :componentId="componentId"
@@ -399,150 +240,3 @@ setTimeout(() => {
     </Section>
   </main>
 </template>
-
-<style scoped>
-
-  .slideTop {
-    animation: slideTop 2.5s forwards;
-  }
-
-  .slideBottom {
-    animation: slideBottom 2.5s forwards;
-  }
-
-  .slideLeft {
-    animation: slideLeft 2.5s forwards;
-  }
-
-  .slideRight {
-    animation: slideRight 2.5s forwards;
-  }
-
-  .slideTopReverse {
-    animation: slideTopReverse 0.5s forwards;
-  }
-
-  .slideBottomReverse {
-    animation: slideBottomReverse 0.5s forwards;
-  }
-
-  .slideLeftReverse {
-    animation: slideLeftReverse 0.5s forwards;
-  }
-
-  .slideRightReverse {
-    animation: slideRightReverse 0.5s forwards;
-  }
-
-  @keyframes slideTop {
-    0% {
-      transform: translateY(0);
-      visibility: visible;
-    }
-    99% {
-      visibility: hidden;
-    }
-    100% {
-      transform: translateY(-100vh);
-      visibility: hidden;
-    }
-  }
-
-  @keyframes slideBottom {
-    0% {
-      transform: translateY(0);
-      visibility: visible;
-    }
-    99% {
-      visibility: hidden;
-    }
-    100% {
-      transform: translateY(100vh);
-      visibility: hidden;
-    }
-  }
-
-  @keyframes slideLeft {
-    0% {
-      transform: translateX(0);
-      visibility: visible;
-    }
-    99% {
-      visibility: hidden;
-    }
-    100% {
-      transform: translateX(-100vw);
-      visibility: hidden;
-    }
-  }
-
-  @keyframes slideRight {
-    0% {
-      transform: translateX(0);
-      visibility: visible;
-    }
-    99% {
-      visibility: hidden;
-    }
-    100% {
-      transform: translateX(100vw);
-      visibility: hidden;
-    }
-  }
-
-  @keyframes slideTopReverse {
-    0% {
-      transform: translateY(-100vh);
-      visibility: hidden;
-    }
-    1% {
-      visibility: visible;
-    }
-    100% {
-      transform: translateY(0);
-      visibility: visible;
-    }
-  }
-
-  @keyframes slideBottomReverse {
-    0% {
-      transform: translateY(100vh);
-      visibility: hidden;
-    }
-    1% {
-      visibility: visible;
-    }
-    100% {
-      transform: translateY(0);
-      visibility: visible;
-    }
-  }
-
-  @keyframes slideLeftReverse {
-    0% {
-      transform: translateX(-100vw);
-      visibility: hidden;
-    }
-    1% {
-      visibility: visible;
-    }
-    100% {
-      transform: translateX(0);
-      visibility: visible;
-    }
-  }
-
-  @keyframes slideRightReverse {
-    0% {
-      transform: translateX(100vw);
-      visibility: hidden;
-    }
-    1% {
-      visibility: visible;
-    }
-    100% {
-      transform: translateX(0);
-      visibility: visible;
-    }
-  }
-</style>

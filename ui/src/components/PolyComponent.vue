@@ -60,6 +60,7 @@ function inputTriggered(onInputFunctionId: number, value: any, sectionId: number
 
 <template>
   <component 
+    :id="props.sectionId.toString() + props.componentId.toString()"
     v-if="!props.component.isDeleted"
     :is="getComponent(props.component.componentType)" 
     v-bind="props.component.props"
