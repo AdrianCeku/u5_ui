@@ -58,7 +58,7 @@ function u5_ui.addSection(options, style, wrapperStyle, innerHTML, isOpen, onVis
         components = {}
     }
 
-    local sectionId = sendToUI({
+    local sectionId = sendToUIandGetReturnValue({
         type = "addSection",
         section = section
     })
@@ -83,7 +83,7 @@ function u5_ui.getSection(sectionId, includeHTML)
         return section
     end
 
-    local elementHTML = sendToUI({
+    local elementHTML = sendToUIandGetReturnValue({
         type = "getSectionElement",
         sectionId = sectionId
     })
@@ -219,7 +219,7 @@ function u5_ui.addComponent(sectionId, componentType, props, style, innerHTML, o
         isDeleted = false
     }
 
-    local componentId = sendToUI({
+    local componentId = sendToUIandGetReturnValue({
         type = "addComponent",
         sectionId = sectionId,
         component = component,
@@ -251,8 +251,8 @@ function u5_ui.getComponent(sectionId, componentId, includeHTML)
         return component
     end
 
-    local elementHTML = sendToUI({
-        type = "getComponentElement",
+    local elementHTML = sendToUIandGetReturnValue({
+        type = "getComponentElementHTML",
         sectionId = sectionId,
         componentId = componentId
     })
@@ -328,8 +328,8 @@ function u5_ui.updateComponent(sectionId, componentId, component)
 end
 
 function u5_ui.getElementsHTML(identifier)
-    local elements = sendToUI({
-        type = "getElement",
+    local elements = sendToUIandGetReturnValue({
+        type = "getElementsHTML",
         identifier = identifier
     })
     
@@ -387,13 +387,42 @@ exports("getObject", function()
     return u5_ui
 end)
 
+--+--+--+--+--+--+ CONFIG +--+--+--+--+--+--+
+AddEventHandler('onResourceStart', function(resourceName)
+    local waitTime = 2000 -- The NUI takes some time to load, so we need to wait a bit before sending the config or it wont register. Please DM me or submit a PR if you know a better way to do this
+
+    Citizen.CreateThread(function()
+        if (GetCurrentResourceName() ~= resourceName) then
+          return
+        end
+    
+        Citizen.Wait(waitTime)
+    
+        config.toggleKeyJS = getJSKey(config.toggleKey)
+    
+        SendNUIMessage({
+            type = "config",
+            config = config
+        })
+    end)
+  end)
+  
+
+
 --+--+--+--+--+--+ CONTROLS +--+--+--+--+--+--+
 
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(0)
-        if IsControlJustPressed(0, 19) then
-            SetNuiFocus(true, true)
-        end
-    end
-end)
+RegisterCommand("showui", function()
+    SetNuiFocus(true, true)
+end, false)
+
+RegisterKeyMapping("showui", config.keybindMessage, "keyboard", config.toggleKey)
+
+
+-- Citizen.CreateThread(function()
+--     while true do
+--         Citizen.Wait(0)
+--         if IsControlJustPressed(0, config.openKey) then
+--             SetNuiFocus(true, true)
+--         end
+--     end
+-- end)

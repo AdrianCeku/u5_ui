@@ -1,0 +1,11 @@
+RegisterNetEvent('u5_ui:client:addSection')
+AddEventHandler('u5_ui:client:addSection', function(options, style, wrapperStyle, innerHTML, isOpen, onVisibilityChange)
+    local sectionId = u5_ui.addSection(options, style, wrapperStyle, innerHTML, isOpen, onVisibilityChange)
+    TriggerEvent('u5_ui:server:addSection', sectionId)
+end)
+
+RegisterNetEvent('u5_ui:client:getSection')
+AddEventHandler('u5_ui:client:getSection', function(sectionId, includeHTML)
+    local section = u5_ui.getSection(sectionId, includeHTML)
+    TriggerEvent('u5_ui:server:getSection', section)
+end)

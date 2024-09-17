@@ -44,7 +44,13 @@ export interface Section {
   components: Component[]
 }
 
+interface Config {
+  toggleKey: string
+  toggleKeyJS: string
+}
+
 // VARIABLES
+let config: Config
 
 const sections = ref<Section[]>([])
 
@@ -85,6 +91,7 @@ const positioningClassesMap = {
   },
 
 }
+// HELPERS
 
 function getPositioningClasses(sectionId: number) {
   const section = sections.value[sectionId]
@@ -103,7 +110,6 @@ function getPositioningClasses(sectionId: number) {
   return classes
 }
 
-// HELPERS
 
 function getCloseAnimation(sectionId: number) {
   const section = sections.value[sectionId]
@@ -141,7 +147,7 @@ function getOpenAnimation(sectionId: number) {
   return "slideTopReverse"
 }
 
-function getElement(identifier: string) {
+function getElementsHTML(identifier: string) {
   const elements = document.querySelectorAll(identifier)
   const elementsHTML = []
 
@@ -235,10 +241,10 @@ function deleteComponent(sectionId: number, componentId: number) {
   sections.value[sectionId].components[componentId].isDeleted = true
 }
 
-function getComponent(sectionId: number, componentId: number) {
+function getComponentHTML(sectionId: number, componentId: number) {
   const id = sectionId.toString() + componentId.toString()
   const element = document.getElementById(id)?.outerHTML
-
+  console.log(element)
   return element
 }
 
@@ -255,12 +261,12 @@ function handleCallback(data: any, callbackId: number) {
     response = addComponent(data.sectionId, data.component)
   }
 
-  else if (data.type === "getElement") {
-    response = getElement(data.identifier)
+  else if (data.type === "getElementsHTML") {
+    response = getElementsHTML(data.identifier)
   }
 
-  else if (data.type === "getComponentElement") {
-    response = getComponent(data.sectionId, data.componentId)
+  else if (data.type === "getComponentElementHTML") {
+    response = getComponentHTML(data.sectionId, data.componentId)
   }
 
   fetch(`https://u5_ui/uiCallback`, {
@@ -316,7 +322,11 @@ window.addEventListener('message', (event) => {
   else if (event.data.type === 'restoreComponent') {
     sections.value[event.data.sectionId].components[event.data.componentId].isDeleted = false
   }
-
+  	
+  else if (event.data.type === "config") {
+    config = event.data.config
+    addExitListener()
+  }
 })
 
 // EXIT
@@ -333,11 +343,25 @@ function exit() {
   });
 }
 
-window.addEventListener("keydown", (event) => {
-  if (event.key.toLowerCase() === "alt") {
-    exit()
+function addExitListener() {
+  window.addEventListener("keydown", (event) => {
+    if (event.code.toLowerCase() === config.toggleKeyJS.toLowerCase()) {
+      exit()
+    }
+  })
+}
+
+setTimeout(() => {
+  if(!config) {
+    console.warn("Timeout | No config received")
+    console.log("Defaulting to Escape key")
+    config = {
+      toggleKey: "Escape",
+      toggleKeyJS: "Escape",
+    }
+    addExitListener()
   }
-})
+}, 5000);
 
 </script>
 
@@ -349,7 +373,7 @@ window.addEventListener("keydown", (event) => {
     <Input label="hello" type="email"/>
   </div>
 
-  <main class="h-svh w-svw">
+  <main>
     <Section 
       v-for="(section, sectionId) in sections" 
       :key="sectionId" 

@@ -6,7 +6,7 @@ author 'github.com/AdrianCeku'
 
 description 'ultimate5-ui'
 
-version '1.0'
+version '0.1b'
 
 lua54 'yes'
 
@@ -20,11 +20,12 @@ files {
 }
 
 shared_scripts{
-
+	"config.lua"
 }
 
 client_scripts{
-	"client/*"
+	"client/functions.lua",
+	"client/ui.lua"
 }
 
 server_scripts{
