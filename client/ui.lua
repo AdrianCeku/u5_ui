@@ -263,6 +263,29 @@ function u5_ui.getComponent(sectionId, componentId, includeHTML)
     }
 end
 
+function u5_ui.updateComponent(sectionId, componentId, component)
+    sectionId = tostring(sectionId)
+    componentId = tostring(componentId)
+
+    if not SECTIONS[sectionId] then
+        return
+    end
+
+    if not SECTIONS[sectionId].components[componentId] then
+        return
+    end
+
+    SECTIONS[sectionId].components[componentId].props = newProps
+
+    SendNUIMessage({
+        type = "updateComponent",
+        sectionId = sectionId,
+        componentId = componentId,
+        component = component
+    })
+end
+
+
 function u5_ui.deleteComponent(sectionId, componentId)
     sectionId = tostring(sectionId)
     componentId = tostring(componentId)
@@ -305,28 +328,6 @@ function u5_ui.restoreComponent(sectionId, componentId)
     })
 end
 
-function u5_ui.updateComponent(sectionId, componentId, component)
-    sectionId = tostring(sectionId)
-    componentId = tostring(componentId)
-
-    if not SECTIONS[sectionId] then
-        return
-    end
-
-    if not SECTIONS[sectionId].components[componentId] then
-        return
-    end
-
-    SECTIONS[sectionId].components[componentId].props = newProps
-
-    SendNUIMessage({
-        type = "updateComponent",
-        sectionId = sectionId,
-        componentId = componentId,
-        component = component
-    })
-end
-
 function u5_ui.getElementsHTML(identifier)
     local elements = sendToUIandGetReturnValue({
         type = "getElementsHTML",
@@ -338,7 +339,7 @@ end
 
 --+--+--+--+--+--+ CALLBACKS +--+--+--+--+--+--+
 
-RegisterNUICallback('clickTriggered', function(data, cb)
+RegisterNUICallback("clickTriggered", function(data, cb)
     local onClickFunctionId = data.onClickFunctionId
 
     local ids = {
@@ -348,10 +349,10 @@ RegisterNUICallback('clickTriggered', function(data, cb)
 
     ON_CLICK_FUNCTIONS[onClickFunctionId](data, ids)
     
-    cb('ok')
+    cb("ok")
 end)
 
-RegisterNUICallback('inputTriggered', function(data, cb)
+RegisterNUICallback("inputTriggered", function(data, cb)
     local onInputFunctionId = data.onInputFunctionId
     local value = data.value
 
@@ -362,23 +363,23 @@ RegisterNUICallback('inputTriggered', function(data, cb)
 
     ON_INPUT_FUNCTIONS[onInputFunctionId](value, ids)
     
-    cb('ok')
+    cb("ok")
 end)
 
-RegisterNUICallback('visibilityChanged', function(data, cb)
+RegisterNUICallback("visibilityChanged", function(data, cb)
     local onVisibilityChangeFunctionId = data.onVisibilityChangeFunctionId
     local isVisible = data.isVisible
     local sectionId = tostring(data.sectionId)
 
     ON_VISIBILITY_CHANGE_FUNCTIONS[onVisibilityChangeFunctionId](isVisible, sectionId)
     
-    cb('ok')
+    cb("ok")
 end)
 
-RegisterNUICallback('exit', function(data, cb)
+RegisterNUICallback("exit", function(data, cb)
     SetNuiFocus(false, false)
     
-    cb('ok')
+    cb("ok")
 end)
 
 --+--+--+--+--+--+ EXPORTS +--+--+--+--+--+--+
@@ -388,7 +389,7 @@ exports("getObject", function()
 end)
 
 --+--+--+--+--+--+ CONFIG +--+--+--+--+--+--+
-AddEventHandler('onResourceStart', function(resourceName)
+AddEventHandler("onResourceStart", function(resourceName)
     local waitTime = 2000 -- The NUI takes some time to load, so we need to wait a bit before sending the config or it wont register. Please DM me or submit a PR if you know a better way to do this
 
     Citizen.CreateThread(function()
