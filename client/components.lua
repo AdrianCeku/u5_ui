@@ -6,14 +6,14 @@ local ON_CLICK_FUNCTIONS_ID = 0
 local ON_INPUT_FUNCTIONS = {}
 local ON_INPUT_FUNCTIONS_ID = 0
 
-local function getOnClickFunctionsId()
+local function getOnClickFunctionId()
     local id = ON_CLICK_FUNCTIONS_ID
     ON_CLICK_FUNCTIONS_ID = ON_CLICK_FUNCTIONS_ID + 1
     
     return tostring(id)
 end
 
-local function getOnInputFunctionsId()
+local function getOnInputFunctionId()
     local id = ON_INPUT_FUNCTIONS_ID
     ON_INPUT_FUNCTIONS_ID = ON_INPUT_FUNCTIONS_ID + 1
     
@@ -27,14 +27,14 @@ function u5_ui.addComponent(sectionId, componentType, props, style, innerHTML, o
     local onClickId = nil
 
     if onClick then
-        onClickId = #ON_CLICK_FUNCTIONS + 1
+        onClickId = getOnClickFunctionId()
         ON_CLICK_FUNCTIONS[onClickId] = onClick
     end
 
     local onInputId = nil
 
     if onInput then
-        onInputId = #ON_INPUT_FUNCTIONS + 1
+        onInputId = getOnInputFunctionId()
         ON_INPUT_FUNCTIONS[onInputId] = onInput
     end
 
@@ -48,7 +48,7 @@ function u5_ui.addComponent(sectionId, componentType, props, style, innerHTML, o
         isDeleted = false
     }
 
-    local componentId = triggerUICallback({
+    local componentId = triggerNuiCallback({
         type = "addComponent",
         sectionId = sectionId,
         component = component,
@@ -80,7 +80,7 @@ function u5_ui.getComponent(sectionId, componentId, includeHTML)
         return component
     end
 
-    local elementHTML = triggerUICallback({
+    local elementHTML = triggerNuiCallback({
         type = "getComponentElementHTML",
         sectionId = sectionId,
         componentId = componentId
@@ -113,7 +113,6 @@ function u5_ui.updateComponent(sectionId, componentId, component)
         component = component
     })
 end
-
 
 function u5_ui.deleteComponent(sectionId, componentId)
     sectionId = tostring(sectionId)
@@ -158,7 +157,7 @@ function u5_ui.restoreComponent(sectionId, componentId)
 end
 
 function u5_ui.getElementsHTML(identifier)
-    local elements = triggerUICallback({
+    local elements = triggerNuiCallback({
         type = "getElementsHTML",
         identifier = identifier
     })

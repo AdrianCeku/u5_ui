@@ -3,8 +3,7 @@
 local ON_VISIBILITY_CHANGE_FUNCTIONS = {}
 local ON_VISIBILITY_CHANGE_FUNCTIONS_ID = 0
 
-
-local function getOnVisibilityChangeFunctionsId()
+local function getOnVisibilityChangeFunctionId()
     local id = ON_VISIBILITY_CHANGE_FUNCTIONS_ID
     ON_VISIBILITY_CHANGE_FUNCTIONS_ID = ON_VISIBILITY_CHANGE_FUNCTIONS_ID + 1
     
@@ -17,7 +16,7 @@ function u5_ui.addSection(options, style, wrapperStyle, innerHTML, isOpen, onVis
     local onVisibilityChangeId = nil
 
     if onVisibilityChange then
-        onVisibilityChangeId = getOnVisibilityChangeFunctionsId()
+        onVisibilityChangeId = getOnVisibilityChangeFunctionId()
         ON_VISIBILITY_CHANGE_FUNCTIONS[onVisibilityChangeId] = onVisibilityChange
     end
 
@@ -32,7 +31,7 @@ function u5_ui.addSection(options, style, wrapperStyle, innerHTML, isOpen, onVis
         components = {}
     }
 
-    local sectionId = triggerUICallback({
+    local sectionId = triggerNuiCallback({
         type = "addSection",
         section = section
     })
@@ -57,7 +56,7 @@ function u5_ui.getSection(sectionId, includeHTML)
         return section
     end
 
-    local elementHTML = triggerUICallback({
+    local elementHTML = triggerNuiCallback({
         type = "getSectionElement",
         sectionId = sectionId
     })
@@ -67,7 +66,6 @@ function u5_ui.getSection(sectionId, includeHTML)
         html = elementHTML
     }
 end
-
 
 function u5_ui.updateSection(sectionId, section)
     sectionId = tostring(sectionId)

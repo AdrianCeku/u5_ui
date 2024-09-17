@@ -8,7 +8,7 @@ local function getCallbackId()
     return tostring(id)
 end
 
-function triggerUICallback(payload)
+function triggerNuiCallback(payload)
     local promise = promise:new()
     local callbackId = getCallbackId()
 
