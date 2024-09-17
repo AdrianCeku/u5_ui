@@ -32,7 +32,7 @@ function u5_ui.addSection(options, style, wrapperStyle, innerHTML, isOpen, onVis
         components = {}
     }
 
-    local sectionId = sendToUIandGetReturnValue({
+    local sectionId = triggerUICallback({
         type = "addSection",
         section = section
     })
@@ -57,7 +57,7 @@ function u5_ui.getSection(sectionId, includeHTML)
         return section
     end
 
-    local elementHTML = sendToUIandGetReturnValue({
+    local elementHTML = triggerUICallback({
         type = "getSectionElement",
         sectionId = sectionId
     })
@@ -174,11 +174,11 @@ RegisterNUICallback("visibilityChanged", function(data, cb)
 
     ON_VISIBILITY_CHANGE_FUNCTIONS[onVisibilityChangeFunctionId](isVisible, sectionId)
     
-    cb("ok")
+    cb("ඞ")
 end)
 
 RegisterNUICallback("exit", function(data, cb)
     SetNuiFocus(false, false)
     
-    cb("ok")
+    cb("ඞ")
 end)

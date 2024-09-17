@@ -48,7 +48,7 @@ function u5_ui.addComponent(sectionId, componentType, props, style, innerHTML, o
         isDeleted = false
     }
 
-    local componentId = sendToUIandGetReturnValue({
+    local componentId = triggerUICallback({
         type = "addComponent",
         sectionId = sectionId,
         component = component,
@@ -80,7 +80,7 @@ function u5_ui.getComponent(sectionId, componentId, includeHTML)
         return component
     end
 
-    local elementHTML = sendToUIandGetReturnValue({
+    local elementHTML = triggerUICallback({
         type = "getComponentElementHTML",
         sectionId = sectionId,
         componentId = componentId
@@ -158,7 +158,7 @@ function u5_ui.restoreComponent(sectionId, componentId)
 end
 
 function u5_ui.getElementsHTML(identifier)
-    local elements = sendToUIandGetReturnValue({
+    local elements = triggerUICallback({
         type = "getElementsHTML",
         identifier = identifier
     })
@@ -178,7 +178,7 @@ RegisterNUICallback("clickTriggered", function(data, cb)
 
     ON_CLICK_FUNCTIONS[onClickFunctionId](data, ids)
     
-    cb("ok")
+    cb("ඞ")
 end)
 
 RegisterNUICallback("inputTriggered", function(data, cb)
@@ -192,5 +192,5 @@ RegisterNUICallback("inputTriggered", function(data, cb)
 
     ON_INPUT_FUNCTIONS[onInputFunctionId](value, ids)
     
-    cb("ok")
+    cb("ඞ")
 end)

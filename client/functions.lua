@@ -8,7 +8,7 @@ local function getCallbackId()
     return tostring(id)
 end
 
-function sendToUIandGetReturnValue(payload)
+function triggerUICallback(payload)
     local promise = promise:new()
     local callbackId = getCallbackId()
 
@@ -38,7 +38,7 @@ RegisterNUICallback(
             UI_CALLBACKS[callbackId] = nil
         end
 
-        cb("ok")
+        cb("ඞ")
     end
 )
 
