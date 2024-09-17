@@ -35,7 +35,7 @@ export interface Section {
     xOverflow?: "visible" | "hidden" | "scroll" | "auto"
     yOverflow?: "visible" | "hidden" | "scroll" | "auto"
   }
-  isOpen?: boolean
+  isOpen: boolean
   style?: string
   wrapperStyle?: string
   innerHTML?: string
@@ -47,6 +47,7 @@ export interface Section {
 interface Config {
   toggleKey: string
   toggleKeyJS: string
+  inputMapper: string
 }
 
 // VARIABLES
@@ -194,11 +195,22 @@ function exit() {
 }
 
 function addExitListener() {
-  window.addEventListener("keydown", (event) => {
+  if (config.inputMapper.toLowerCase() === "keyboard") {
+    window.addEventListener("keydown", (event) => {
     if (event.code.toLowerCase() === config.toggleKeyJS.toLowerCase()) {
       exit()
     }
   })
+  }
+
+  else if (config.inputMapper.toLowerCase() === "mouse_button") {
+    window.addEventListener("mousedown", (event) => {
+      if(event.button.toString() === config.toggleKeyJS.toLowerCase()) {
+        exit()
+      }
+    })
+  }
+
 }
 
 setTimeout(() => {
@@ -208,6 +220,7 @@ setTimeout(() => {
     config = {
       toggleKey: "Escape",
       toggleKeyJS: "Escape",
+      inputMapper: "keyboard"
     }
     addExitListener()
   }
@@ -228,7 +241,7 @@ setTimeout(() => {
       v-for="(section, sectionId) in sections" 
       :key="sectionId" 
       :section="section"
-      :section-id="sectionId"
+      :sectionId="sectionId"
       >
       <PolyComponent
         v-for="(component, componentId) in section.components"

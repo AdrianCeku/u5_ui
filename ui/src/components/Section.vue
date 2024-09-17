@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTemplateRef } from 'vue'
+import { useTemplateRef, onMounted } from 'vue'
 import type { Section } from "../App.vue"
 
 const sectionElement = useTemplateRef<HTMLDivElement>("section")
@@ -116,6 +116,7 @@ function getClasses() {
 
 function getCloseAnimation() {
   const section = props.section
+
   if(section.options.xAlign === "left") {
     return "slideLeft"
   }
@@ -134,6 +135,7 @@ function getCloseAnimation() {
 
 function getOpenAnimation() {
   const section = props.section
+
   if(section.options.xAlign === "left") {
     return "slideLeftReverse"
   }
@@ -171,13 +173,12 @@ function visibilityChanged(onVisibilityChangeFunctionId: number, isVisible: bool
 function openSection() {
   const onVisChangeId = props.section.onVisibilityChangeFunctionId
 
-  if(props.section.isOpen) return
   if(!sectionElement.value) return
 
   sectionElement.value.classList.remove(getCloseAnimation())
   sectionElement.value.classList.add(getOpenAnimation())
 
-  if(onVisChangeId) {
+  if(onVisChangeId && !props.section.isOpen) {
     visibilityChanged(onVisChangeId, true)
   }
 
@@ -187,13 +188,12 @@ function openSection() {
 function closeSection() {
   const onVisChangeId = props.section.onVisibilityChangeFunctionId 
 
-  if(!props.section.isOpen) return
   if(!sectionElement.value) return
 
   sectionElement.value.classList.remove(getOpenAnimation())
   sectionElement.value.classList.add(getCloseAnimation())
   
-  if(onVisChangeId) {
+  if(onVisChangeId && props.section.isOpen) {
     visibilityChanged(onVisChangeId, false)
   }
 
@@ -202,14 +202,29 @@ function closeSection() {
 
 // LISTENERS
 
+onMounted(() => {
+  setTimeout(() => {
+    if(sectionElement.value) {
+      sectionElement.value.classList.remove("hidden")
+      if(props.section.isOpen) openSection()
+    }
+  }, 500)
+})
+
 window.addEventListener("message", (event) => {
   if (event.data.type === "closeSection") {
     const data = event.data
+
+    if(data.sectionId !== props.sectionId.toString()) return
+
     closeSection()
   }
-
+  
   else if (event.data.type === "openSection") {
     const data = event.data
+
+    if(data.sectionId !== props.sectionId.toString()) return
+    
     openSection()
   }
 })
@@ -220,8 +235,8 @@ window.addEventListener("message", (event) => {
     <section 
       v-if="!props.section.isDeleted"
       ref="section"
-      :class="getPositioningClasses()"
-      class="m-10"
+      :class="[...getPositioningClasses(),getCloseAnimation()]"
+      class="m-10 hidden"
       :id="props.sectionId.toString()"
       :style="props.section.wrapperStyle"
     >
