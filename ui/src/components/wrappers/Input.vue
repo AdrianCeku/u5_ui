@@ -10,6 +10,30 @@ const props = defineProps<{
 
 let inputValue = ref<string | number | undefined>("")
 
+function onFocus() {
+    fetch(`https://u5_ui/focusInput`, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json; charset=UTF-8",
+    },
+    body: JSON.stringify({
+        inputValue: inputValue.value
+    })
+  });
+}
+
+function onFocusOut() {
+    fetch(`https://u5_ui/focusOutInput`, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json; charset=UTF-8",
+    },
+    body: JSON.stringify({
+        inputValue: inputValue.value
+    })
+  });
+}
+
 </script>
 
 <template>
@@ -22,6 +46,8 @@ let inputValue = ref<string | number | undefined>("")
             @click="$emit('event-click', inputValue)"
             @input="$emit('event-input', inputValue)"
             :placeholder="props.placeholder"
+            @focus="onFocus()"
+            @focusout="onFocusOut()"
         />
     </div>
 </template>

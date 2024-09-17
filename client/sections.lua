@@ -176,12 +176,6 @@ RegisterNUICallback("visibilityChanged", function(data, cb)
     cb("ඞ")
 end)
 
-RegisterNUICallback("exit", function(data, cb)
-    SetNuiFocus(false, false)
-    
-    cb("ඞ")
-end)
-
 --+--+--+--+--+--+ EVENTS +--+--+--+--+--+--+
 
 RegisterNetEvent("u5_ui:client:addSection", addSection)
