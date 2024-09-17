@@ -194,10 +194,11 @@ function openSection(sectionId: number) {
   const onVisChangeId = sections.value[sectionId].onVisibilityChangeFunctionId
   const section = document.getElementById(sectionId.toString())
 
-  if(section) {
-    section.classList.remove(getCloseAnimation(sectionId))
-    section.classList.add(getOpenAnimation(sectionId))
-  }
+  if(sections.value[sectionId].isOpen) return
+  if(!section) return
+
+  section.classList.remove(getCloseAnimation(sectionId))
+  section.classList.add(getOpenAnimation(sectionId))
 
   if(onVisChangeId) {
     visibilityChanged(onVisChangeId, true, sectionId)
@@ -210,10 +211,12 @@ function closeSection(sectionId: number) {
   const onVisChangeId = sections.value[sectionId].onVisibilityChangeFunctionId 
   const section = document.getElementById(sectionId.toString())
 
-  if(section) {
-    section.classList.remove(getOpenAnimation(sectionId))
-    section.classList.add(getCloseAnimation(sectionId))
-  }
+  if(!sections.value[sectionId].isOpen) return
+  if(!section) return
+
+  section.classList.remove(getOpenAnimation(sectionId))
+  section.classList.add(getCloseAnimation(sectionId))
+  
   if(onVisChangeId) {
     visibilityChanged(onVisChangeId, false, sectionId)
   }
