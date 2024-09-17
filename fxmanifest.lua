@@ -25,7 +25,10 @@ shared_scripts{
 
 client_scripts{
 	"client/functions.lua",
-	"client/ui.lua"
+	"client/main.lua",
+	"client/sections.lua",
+	"client/components.lua",
+	"client/events.lua",
 }
 
 server_scripts{
