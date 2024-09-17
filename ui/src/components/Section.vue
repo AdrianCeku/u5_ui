@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import type { Section } from '../App.vue'
+import type { Section } from "../App.vue"
 
 
 const classesMap = {
@@ -59,7 +59,7 @@ const props = defineProps<{
       v-if="!props.section.isDeleted"
     >
       <div
-        :style='props.section.style'
+        :style="props.section.style"
         :class="getClasses()"
         class="max-h-full max-w-full scroll-bar-styles"
       >

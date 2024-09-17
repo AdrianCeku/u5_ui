@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Input } from '../ui/input'
-import { ref } from 'vue'
+import { Input } from "../ui/input"
+import { ref } from "vue"
 
 const props = defineProps<{
     label?: string

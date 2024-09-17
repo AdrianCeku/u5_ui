@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import Accordion from './wrappers/Accordion.vue'
-import Alert from './wrappers/Alert.vue'
-import AlertDialog from './wrappers/AlertDialog.vue'
-import Input from './wrappers/Input.vue'
+import Accordion from "./wrappers/Accordion.vue"
+import Alert from "./wrappers/Alert.vue"
+import AlertDialog from "./wrappers/AlertDialog.vue"
+import Input from "./wrappers/Input.vue"
 
-import type { Component } from '../App.vue'
+import type { Component } from "../App.vue"
 
 interface ComponentMap {
   [key: string]: any;
@@ -29,9 +29,9 @@ const props = defineProps<{
 
 function clickTriggered(onClickFunctionId: number, data: any, sectionId: number, componentId: number) {
   fetch(`https://u5_ui/clickTriggered`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
+        "Content-Type": "application/json; charset=UTF-8",
     },
     body: JSON.stringify({
         onClickFunctionId: onClickFunctionId,
@@ -44,9 +44,9 @@ function clickTriggered(onClickFunctionId: number, data: any, sectionId: number,
 
 function inputTriggered(onInputFunctionId: number, value: any, sectionId: number, componentId: number) {
   fetch(`https://u5_ui/inputTriggered`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
+        "Content-Type": "application/json; charset=UTF-8",
     },
     body: JSON.stringify({
         onInputFunctionId: onInputFunctionId,

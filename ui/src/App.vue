@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // IMPORTS
-import { ref } from 'vue';
+import { ref } from "vue";
 
-import Section from '@/components/Section.vue'
-import PolyComponent from '@/components/PolyComponent.vue'
+import Section from "@/components/Section.vue"
+import PolyComponent from "@/components/PolyComponent.vue"
 
 // TYPES
 
@@ -163,9 +163,9 @@ function getElementsHTML(identifier: string) {
 
 function visibilityChanged(onVisibilityChangeFunctionId: number, isVisible: boolean, sectionId: number) {
   fetch(`https://u5_ui/visibilityChanged`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
+        "Content-Type": "application/json; charset=UTF-8",
     },
     body: JSON.stringify({
         sectionId: sectionId,
@@ -230,13 +230,13 @@ function deleteSection(sectionId: number) {
 
 // COMPONENTS
 
-function addComponent(sectionId: number, component: Section['components'][0]) {
+function addComponent(sectionId: number, component: Section["components"][0]) {
   sections.value[sectionId].components.push(component)
 
   return sections.value[sectionId].components.length - 1
 }
 
-function updateComponent(sectionId: number, componentId: number, component: Section['components'][0]) {
+function updateComponent(sectionId: number, componentId: number, component: Section["components"][0]) {
   sections.value[sectionId].components[componentId] = component
 }
 
@@ -256,7 +256,7 @@ function getComponentHTML(sectionId: number, componentId: number) {
 function handleCallback(data: any, callbackId: number) {
   let response = null
 
-  if (data.type === 'addSection') {
+  if (data.type === "addSection") {
     response = addSection(data.section)
   }
 
@@ -273,9 +273,9 @@ function handleCallback(data: any, callbackId: number) {
   }
 
   fetch(`https://u5_ui/uiCallback`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
+        "Content-Type": "application/json; charset=UTF-8",
     },
     body: JSON.stringify({
         callbackId: callbackId,
@@ -284,8 +284,8 @@ function handleCallback(data: any, callbackId: number) {
   });
 }
 
-window.addEventListener('message', (event) => {
-  if (event.data.type === 'uiCallback') {
+window.addEventListener("message", (event) => {
+  if (event.data.type === "uiCallback") {
     const data = event.data
     handleCallback(data.payload, data.callbackId)
   }
@@ -295,34 +295,34 @@ window.addEventListener('message', (event) => {
     updateComponent(data.sectionId, data.componentId, data.component)
   }
 
-  else if (event.data.type === 'updateSection') {
+  else if (event.data.type === "updateSection") {
     const data = event.data.data
     updateSection(data.sectionId, data.section)
   }
 
-  else if (event.data.type === 'closeSection') {
+  else if (event.data.type === "closeSection") {
     const data = event.data
     closeSection(data.sectionId)
   }
 
-  else if (event.data.type === 'openSection') {
+  else if (event.data.type === "openSection") {
     const data = event.data
     openSection(data.sectionId)
   }
 
-  else if (event.data.type === 'deleteSection') {
+  else if (event.data.type === "deleteSection") {
     deleteSection(event.data.sectionId)
   }
 
-  else if (event.data.type === 'deleteComponent') {
+  else if (event.data.type === "deleteComponent") {
     deleteComponent(event.data.sectionId, event.data.componentId)
   }
 
-  else if (event.data.type === 'restoreSection') {
+  else if (event.data.type === "restoreSection") {
     sections.value[event.data.sectionId].isDeleted = false
   }
 
-  else if (event.data.type === 'restoreComponent') {
+  else if (event.data.type === "restoreComponent") {
     sections.value[event.data.sectionId].components[event.data.componentId].isDeleted = false
   }
   	
@@ -336,9 +336,9 @@ window.addEventListener('message', (event) => {
 
 function exit() {
   fetch(`https://u5_ui/exit`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
+        "Content-Type": "application/json; charset=UTF-8",
     },
     body: JSON.stringify({
         1: 1

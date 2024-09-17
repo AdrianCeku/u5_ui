@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Alert, AlertDescription, AlertTitle } from '../ui/alert'
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert"
 
 const props = defineProps({
     headline: String,
