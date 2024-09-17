@@ -6,14 +6,14 @@ local ON_CLICK_FUNCTIONS_ID = 0
 local ON_INPUT_FUNCTIONS = {}
 local ON_INPUT_FUNCTIONS_ID = 0
 
-local function getOnClickFunctionId()
+function getOnClickFunctionId()
     local id = ON_CLICK_FUNCTIONS_ID
     ON_CLICK_FUNCTIONS_ID = ON_CLICK_FUNCTIONS_ID + 1
     
     return tostring(id)
 end
 
-local function getOnInputFunctionId()
+function getOnInputFunctionId()
     local id = ON_INPUT_FUNCTIONS_ID
     ON_INPUT_FUNCTIONS_ID = ON_INPUT_FUNCTIONS_ID + 1
     
@@ -22,7 +22,7 @@ end
 
 --+--+--+--+--+--+ COMPONENT +--+--+--+--+--+--+
 
-function u5_ui.addComponent(sectionId, componentType, props, style, innerHTML, onClick, onInput)
+function addComponent(sectionId, componentType, props, style, innerHTML, onClick, onInput)
     sectionId = tostring(sectionId)
     local onClickId = nil
 
@@ -62,7 +62,7 @@ function u5_ui.addComponent(sectionId, componentType, props, style, innerHTML, o
     return componentId
 end
 
-function u5_ui.getComponent(sectionId, componentId, includeHTML)
+function getComponent(sectionId, componentId, includeHTML)
     sectionId = tostring(sectionId)
     componentId = tostring(componentId)
 
@@ -92,7 +92,7 @@ function u5_ui.getComponent(sectionId, componentId, includeHTML)
     }
 end
 
-function u5_ui.updateComponent(sectionId, componentId, component)
+function updateComponent(sectionId, componentId, component)
     sectionId = tostring(sectionId)
     componentId = tostring(componentId)
 
@@ -114,7 +114,7 @@ function u5_ui.updateComponent(sectionId, componentId, component)
     })
 end
 
-function u5_ui.deleteComponent(sectionId, componentId)
+function deleteComponent(sectionId, componentId)
     sectionId = tostring(sectionId)
     componentId = tostring(componentId)
 
@@ -135,7 +135,7 @@ function u5_ui.deleteComponent(sectionId, componentId)
     })
 end
 
-function u5_ui.restoreComponent(sectionId, componentId)
+function restoreComponent(sectionId, componentId)
     sectionId = tostring(sectionId)
     componentId = tostring(componentId)
 
@@ -156,7 +156,7 @@ function u5_ui.restoreComponent(sectionId, componentId)
     })
 end
 
-function u5_ui.getElementsHTML(identifier)
+function getElementsHTML(identifier)
     local elements = triggerNuiCallback({
         type = "getElementsHTML",
         identifier = identifier
@@ -193,3 +193,19 @@ RegisterNUICallback("inputTriggered", function(data, cb)
     
     cb("ඞ")
 end)
+
+--+--+--+--+--+--+ EVENTS +--+--+--+--+--+--+
+
+RegisterNetEvent("u5_ui:client:addComponent", addComponent)
+RegisterNetEvent("u5_ui:client:getComponent", getComponent)
+RegisterNetEvent("u5_ui:client:updateComponent", updateComponent)
+RegisterNetEvent("u5_ui:client:deleteComponent", deleteComponent)
+RegisterNetEvent("u5_ui:client:restoreComponent", restoreComponent)
+
+--+--+--+--+--+--+ EXPORTS +--+--+--+--+--+--+
+
+exports("addComponent", addComponent)
+exports("getComponent", getComponent)
+exports("updateComponent", updateComponent)
+exports("deleteComponent", deleteComponent)
+exports("restoreComponent", restoreComponent)

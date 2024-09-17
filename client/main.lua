@@ -1,6 +1,5 @@
-local utils = exports["u5_utils"].getObject()
+local utils = exports["u5_utils"]
 
-u5_ui = {}
 SECTIONS = {}
 
 --+--+--+--+--+--+ CONTROLS +--+--+--+--+--+--+
@@ -33,7 +32,3 @@ AddEventHandler("onResourceStart", function(resourceName)
   end)
 
 --+--+--+--+--+--+ EXPORTS +--+--+--+--+--+--+
-
-exports("getObject", function()
-    return u5_ui
-end)

@@ -27,20 +27,17 @@ function triggerNuiCallback(payload)
     return Citizen.Await(promise)
 end
 
-RegisterNUICallback(
-    "uiCallback",
-    function(data, cb)
-        local callbackId = data.callbackId
-        local response = data.response
+RegisterNUICallback("uiCallback",function(data, cb)
+    local callbackId = data.callbackId
+    local response = data.response
 
-        if UI_CALLBACKS[callbackId] then
-            UI_CALLBACKS[callbackId](response)
-            UI_CALLBACKS[callbackId] = nil
-        end
-
-        cb("ඞ")
+    if UI_CALLBACKS[callbackId] then
+        UI_CALLBACKS[callbackId](response)
+        UI_CALLBACKS[callbackId] = nil
     end
-)
+
+    cb("ඞ")
+end)
 
 function getJSKey(gtaKeyId)
     local key = string.upper(tostring(gtaKeyId))

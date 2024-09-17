@@ -1,9 +1,10 @@
+local utils = exports["u5_utils"]
 --+--+--+--+--+--+ IDS +--+--+--+--+--+--+
 
 local ON_VISIBILITY_CHANGE_FUNCTIONS = {}
 local ON_VISIBILITY_CHANGE_FUNCTIONS_ID = 0
 
-local function getOnVisibilityChangeFunctionId()
+function getOnVisibilityChangeFunctionId()
     local id = ON_VISIBILITY_CHANGE_FUNCTIONS_ID
     ON_VISIBILITY_CHANGE_FUNCTIONS_ID = ON_VISIBILITY_CHANGE_FUNCTIONS_ID + 1
     
@@ -12,7 +13,7 @@ end
 
 --+--+--+--+--+--+ SECTION +--+--+--+--+--+--+
 
-function u5_ui.addSection(options, style, wrapperStyle, innerHTML, isOpen, onVisibilityChange)
+function addSection(options, style, wrapperStyle, innerHTML, isOpen, onVisibilityChange)
     local onVisibilityChangeId = nil
 
     if onVisibilityChange then
@@ -43,7 +44,7 @@ function u5_ui.addSection(options, style, wrapperStyle, innerHTML, isOpen, onVis
     return sectionId
 end
 
-function u5_ui.getSection(sectionId, includeHTML)
+function getSection(sectionId, includeHTML)
     sectionId = tostring(sectionId)
 
     if not SECTIONS[sectionId] then
@@ -67,7 +68,7 @@ function u5_ui.getSection(sectionId, includeHTML)
     }
 end
 
-function u5_ui.updateSection(sectionId, section)
+function updateSection(sectionId, section)
     sectionId = tostring(sectionId)
 
     if not SECTIONS[sectionId] then
@@ -83,7 +84,7 @@ function u5_ui.updateSection(sectionId, section)
     })
 end
 
-function u5_ui.openSection(sectionId)
+function openSection(sectionId)
     sectionId = tostring(sectionId)
 
     if not SECTIONS[sectionId] then
@@ -96,7 +97,7 @@ function u5_ui.openSection(sectionId)
     })
 end
 
-function u5_ui.closeSection(sectionId)
+function closeSection(sectionId)
     sectionId = tostring(sectionId)
 
     if not SECTIONS[sectionId] then
@@ -109,7 +110,7 @@ function u5_ui.closeSection(sectionId)
     })
 end
 
-function u5_ui.deleteSection(sectionId)
+function deleteSection(sectionId)
     sectionId = tostring(sectionId)
     if not SECTIONS[sectionId] then
         return
@@ -123,7 +124,7 @@ function u5_ui.deleteSection(sectionId)
     })
 end
 
-function u5_ui.restoreSection(sectionId)
+function restoreSection(sectionId)
     sectionId = tostring(sectionId)
 
     if not SECTIONS[sectionId] then
@@ -138,7 +139,7 @@ function u5_ui.restoreSection(sectionId)
     })
 end
 
-function u5_ui.bindSectionToCoords(sectionId, coords, marker)
+function bindSectionToCoords(sectionId, coords, marker)
     sectionId = tostring(sectionId)
 
     local range = 2
@@ -147,14 +148,14 @@ function u5_ui.bindSectionToCoords(sectionId, coords, marker)
     }
 
     local onEnter = function()
-        u5_ui.openSection(sectionId)
+        openSection(sectionId)
     end
 
     local onExit = function()
-        u5_ui.closeSection(sectionId)
+        closeSection(sectionId)
     end
 
-    utils.addInteractPoint(
+    utils:addInteractPoint(
         coords,
         range,
         marker,
@@ -180,3 +181,25 @@ RegisterNUICallback("exit", function(data, cb)
     
     cb("ඞ")
 end)
+
+--+--+--+--+--+--+ EVENTS +--+--+--+--+--+--+
+
+RegisterNetEvent("u5_ui:client:addSection", addSection)
+RegisterNetEvent("u5_ui:client:getSection", getSection)
+RegisterNetEvent("u5_ui:client:updateSection", updateSection)
+RegisterNetEvent("u5_ui:client:openSection", openSection)
+RegisterNetEvent("u5_ui:client:closeSection", closeSection)
+RegisterNetEvent("u5_ui:client:deleteSection", deleteSection)
+RegisterNetEvent("u5_ui:client:restoreSection", restoreSection)
+RegisterNetEvent("u5_ui:client:bindSectionToCoords", bindSectionToCoords)
+
+--+--+--+--+--+--+ EXPORTS +--+--+--+--+--+--+
+
+exports("addSection", addSection)
+exports("getSection", getSection)
+exports("updateSection", updateSection)
+exports("openSection", openSection)
+exports("closeSection", closeSection)
+exports("deleteSection", deleteSection)
+exports("restoreSection", restoreSection)
+exports("bindSectionToCoords", bindSectionToCoords)

@@ -28,7 +28,6 @@ client_scripts{
 	"client/main.lua",
 	"client/sections.lua",
 	"client/components.lua",
-	"client/events.lua",
 }
 
 server_scripts{
