@@ -225,16 +225,17 @@ setTimeout(() => {
     addExitListener()
   }
 }, 5000);
-
+import Avatar from "./components/wrappers/Avatar.vue"
+import Badge from "./components/wrappers/Badge.vue"
+import Input from "./components/wrappers/Input.vue"
 </script>
 
 <template>
-  <div class="p-10" v-if="false">
-    <Accordion headline="Test" content="Wow"/>
-    <Alert headline="Test" content="Wow"/>
-    <AlertDialog trigger="amk" headline="Test" content="Wow" > <img src="https://forum.cfx.re/user_avatar/forum.cfx.re/sifro/288/3966684_2.png"/> </AlertDialog>
-    <Input label="hello" type="email"/>
-  </div>
+  <div class="p-10" v-if="true">
+    <Avatar fallback="AB" :size="3"></Avatar>
+    <Badge content="New" :size="1" variant="outline"></Badge>
+    <Input label="Name" type="number" placeholder="..."></Input>
+  </div>  
 
   <main>
     <Section 

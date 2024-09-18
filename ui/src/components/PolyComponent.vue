@@ -3,17 +3,17 @@ import Accordion from "./wrappers/Accordion.vue"
 import Alert from "./wrappers/Alert.vue"
 import AlertDialog from "./wrappers/AlertDialog.vue"
 import Input from "./wrappers/Input.vue"
+import Avatar from "./wrappers/Avatar.vue"
+import Badge from "./wrappers/Badge.vue"
 
 import type { Component } from "../App.vue"
 
-interface ComponentMap {
-  [key: string]: any;
-}
-
-const componentMap: ComponentMap = {
+const componentMap: {[key: string]: any} = {
   "Accordion": Accordion,
   "Alert": Alert,
   "AlertDialog": AlertDialog,
+  "Avatar": Avatar,
+  "Badge": Badge,
   "Input": Input,
 }
 
