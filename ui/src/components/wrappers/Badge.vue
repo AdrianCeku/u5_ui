@@ -22,5 +22,6 @@ const sizes = {
     :variant="props.variant"
   >
     {{ content }}
+    <slot />
   </Badge>
 </template>

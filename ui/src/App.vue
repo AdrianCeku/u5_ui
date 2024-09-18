@@ -231,10 +231,10 @@ import Input from "./components/wrappers/Input.vue"
 </script>
 
 <template>
-  <div class="p-10" v-if="true">
+  <div class="p-10" v-if="false">
     <Avatar fallback="AB" :size="3"></Avatar>
     <Badge content="New" :size="1" variant="outline"></Badge>
-    <Input label="Name" type="number" placeholder="..."></Input>
+    <Input label="Name" type="checkbox" placeholder="..."></Input>
   </div>  
 
   <main>
